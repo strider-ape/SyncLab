@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SyncLab sidebar mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,500;0,700;1,500&family=Lexend:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sl-bg: #fbf3e1;
+    --sl-dot: #e2d4b4;
+    --sl-card: #fffdf7;
+    --sl-field: #ffffff;
+    --sl-ink: #111111;
+    --sl-text: #111111;
+    --sl-muted: #5f574a;
+    --sl-on-fill: #111111;
+    --sl-log: #141414;
+    --sl-log-text: #9b9586;
+
+    --sl-yellow: #ffd23f;
+    --sl-pink: #ff92c6;
+    --sl-green: #7fe18b;
+    --sl-blue: #8ccaff;
+    --sl-violet: #c6abff;
+    --sl-orange: #ffb35c;
+    --sl-red: #ff7d7d;
+
+    --sl-bw: 3px;
+    --sl-bw-sm: 2.5px;
+    --sl-r: 16px;
+    --sl-r-md: 11px;
+    --sl-r-sm: 8px;
+    --sl-shadow: 6px 6px 0 var(--sl-ink);
+    --sl-shadow-md: 4px 4px 0 var(--sl-ink);
+    --sl-shadow-sm: 3px 3px 0 var(--sl-ink);
+
+    --font-ui: "Lexend", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+
+    --ob-bg: #ffffff;
+    --ob-text: #2b2b2b;
+    --ob-muted: #8a8a8a;
+    --ob-ribbon: #f3f3f3;
+    --ob-line: #e3e3e3;
+  }
+  :root[data-theme="dark"] {
+    --sl-bg: #19181c;
+    --sl-dot: #2f2d34;
+    --sl-card: #232227;
+    --sl-field: #1c1b20;
+    --sl-ink: #f3e9d2;
+    --sl-text: #f6f0e1;
+    --sl-muted: #b3aa98;
+    --sl-log: #0e0d10;
+    --sl-log-text: #8d8778;
+
+    --ob-bg: #1e1e1e;
+    --ob-text: #dcddde;
+    --ob-muted: #8b8b8b;
+    --ob-ribbon: #161616;
+    --ob-line: #2e2e2e;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh; padding: 28px 16px 48px;
+    font-family: var(--font-ui); color: var(--sl-text);
+    background-color: var(--sl-bg);
+    background-image: radial-gradient(var(--sl-dot) 1.3px, transparent 1.5px);
+    background-size: 20px 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 22px;
+  }
+  button { font-family: inherit; color: inherit; }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; }
+  .seg { display: inline-flex; align-items: center; gap: 6px; }
+  .seg > span { font-weight: 800; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; margin-right: 2px; }
+  .chip {
+    border: var(--sl-bw-sm) solid var(--sl-ink); border-radius: 999px; background: var(--sl-card);
+    padding: 5px 13px; font-weight: 700; font-size: 13px; cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { background: var(--sl-ink); color: var(--sl-card); }
+
+  .window {
+    width: min(1040px, 100%); min-height: 760px; display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) var(--sidebar-w, 380px);
+    border: var(--sl-bw) solid var(--sl-ink); border-radius: 18px; overflow: hidden;
+    box-shadow: 8px 8px 0 var(--sl-ink); background: var(--ob-bg);
+  }
+  .ribbon { background: var(--ob-ribbon); border-right: 1px solid var(--ob-line); display: flex; flex-direction: column; align-items: center; gap: 14px; padding-top: 14px; }
+  .ribbon i { width: 18px; height: 18px; border-radius: 5px; background: var(--ob-line); display: block; }
+  .ribbon i.on { background: var(--sl-yellow); border: 2px solid #111; }
+  .editor { background: var(--ob-bg); color: var(--ob-text); padding: 40px 44px; font-family: system-ui, sans-serif; border-right: 1px solid var(--ob-line); }
+  .editor .crumb { color: var(--ob-muted); font-size: 13px; margin-bottom: 26px; }
+  .editor h1 { font-size: 28px; margin: 0 0 16px; font-weight: 700; }
+  .editor p { line-height: 1.75; margin: 0 0 14px; font-size: 15px; }
+  .editor .tag { color: #7a5af8; }
+
+  .synclab {
+    min-width: 0; padding: 20px 18px 22px; display: flex; flex-direction: column; gap: 20px;
+    background-color: var(--sl-bg);
+    background-image: radial-gradient(var(--sl-dot) 1.3px, transparent 1.5px);
+    background-size: 20px 20px;
+    color: var(--sl-text); font-family: var(--font-ui);
+  }
+
+  .sl-path {
+    align-self: flex-start; font: 700 12px var(--font-mono); padding: 4px 10px;
+    background: var(--sl-card); border: var(--sl-bw-sm) solid var(--sl-ink); border-radius: var(--sl-r-sm);
+    box-shadow: var(--sl-shadow-sm);
+  }
+  .sl-brand { display: flex; flex-direction: column; gap: 8px; }
+  .sl-wordmark { margin: 4px 0 0; font-weight: 900; font-size: 40px; line-height: .95; letter-spacing: -.02em; text-transform: uppercase; }
+  .sl-wordmark .lab {
+    display: inline-block; margin-left: 4px; padding: 2px 12px 4px; background: var(--sl-yellow); color: var(--sl-on-fill);
+    border: var(--sl-bw) solid var(--sl-ink); box-shadow: 5px 5px 0 var(--sl-ink); transform: rotate(-2.5deg);
+  }
+  .sl-tagline { font-weight: 700; font-size: 14px; margin: 6px 0 0; }
+  .sl-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: 999px;
+    border: var(--sl-bw-sm) solid var(--sl-ink); font-weight: 800; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase;
+    background: var(--sl-card); white-space: nowrap;
+  }
+  .pill .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .pill.connected { background: var(--sl-green); color: var(--sl-on-fill); box-shadow: var(--sl-shadow-sm); transform: rotate(-2deg); }
+  .pill.branch { font-family: var(--font-mono); letter-spacing: 0; text-transform: none; font-size: 12px; }
+  .pill svg { width: 14px; height: 14px; flex: none; }
+
+  .card { background: var(--sl-card); border: var(--sl-bw) solid var(--sl-ink); border-radius: var(--sl-r); box-shadow: var(--sl-shadow); overflow: hidden; }
+  .card-head { display: flex; align-items: flex-start; gap: 10px; padding: 13px 14px 12px; border-bottom: var(--sl-bw) solid var(--sl-ink); color: var(--sl-on-fill); }
+  .card-head .titles { flex: 1; min-width: 0; }
+  .card-head h2 { margin: 0; font-size: 19px; font-weight: 900; letter-spacing: -.01em; line-height: 1.15; }
+  .card-head p { margin: 3px 0 0; font-size: 12.5px; font-weight: 700; }
+  .card-head .pill { background: #fffdf7; color: #111; border-color: #111; font-size: 10.5px; padding: 4px 10px; }
+  .head-yellow { background: var(--sl-yellow); } .head-pink { background: var(--sl-pink); }
+  .head-blue { background: var(--sl-blue); } .head-violet { background: var(--sl-violet); }
+  .card-body { padding: 14px; display: grid; gap: 12px; }
+
+  .label { font-weight: 800; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+  .label .grow { flex: 1; }
+  .field {
+    width: 100%; min-height: 64px; resize: vertical; padding: 10px 12px; border-radius: var(--sl-r-md);
+    border: var(--sl-bw) solid var(--sl-ink); background: var(--sl-field); color: var(--sl-text);
+    font: 500 14px/1.5 var(--font-ui); outline: none; transition: box-shadow .1s ease;
+  }
+  .field:focus { box-shadow: var(--sl-shadow-sm); }
+  .field::placeholder { color: var(--sl-muted); }
+  .hint { margin: -4px 0 0; font-size: 12px; color: var(--sl-muted); line-height: 1.5; }
+
+  .sync {
+    position: relative; overflow: hidden; width: 100%; min-height: 62px; padding: 0 16px; cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    background: var(--sl-green); color: var(--sl-on-fill); border: var(--sl-bw) solid var(--sl-ink); border-radius: 13px;
+    box-shadow: 5px 5px 0 var(--sl-ink); font-weight: 900; font-size: 21px; letter-spacing: .05em; text-transform: uppercase;
+    transition: transform .07s ease, box-shadow .07s ease;
+  }
+  .sync:active:not(:disabled) { transform: translate(5px, 5px); box-shadow: 0 0 0 var(--sl-ink); }
+  .sync .ico { font-size: 22px; line-height: 1; display: inline-block; }
+  .sync .text { flex: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sync .counts { display: flex; gap: 6px; }
+  .sync .counts span {
+    font: 700 12px var(--font-mono); letter-spacing: 0; padding: 3px 8px; border-radius: 999px;
+    background: #fffdf7; color: #111; border: 2px solid #111;
+  }
+  .sync.busy { cursor: progress; background-image: repeating-linear-gradient(-45deg, rgba(17,17,17,.12) 0 12px, transparent 12px 24px); background-size: 34px 34px; animation: stripes .6s linear infinite; }
+  .sync.busy .ico { animation: spin 1s linear infinite; }
+  .sync.done { background: var(--sl-yellow); }
+  .sync.idle-empty { background: var(--sl-card); color: var(--sl-text); box-shadow: var(--sl-shadow-sm); cursor: default; font-size: 17px; }
+  .sync.idle-empty .counts { display: none; }
+  @keyframes stripes { to { background-position: 34px 0; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .row {
+    display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; align-items: center; gap: 10px;
+    padding: 8px 10px; border: var(--sl-bw-sm) solid var(--sl-ink); border-radius: var(--sl-r-md); background: var(--sl-field);
+    cursor: pointer; transition: transform .08s ease, box-shadow .08s ease;
+  }
+  .row:hover { transform: translate(-2px, -2px); box-shadow: var(--sl-shadow-sm); }
+  .row .name { min-width: 0; }
+  .row .name b { display: block; font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .name small { display: block; font-size: 11.5px; color: var(--sl-muted); font-weight: 500; }
+  .row .diff { font: 700 11px var(--font-mono); color: var(--sl-muted); white-space: nowrap; }
+  .row.off { opacity: .45; }
+  .list { display: grid; gap: 8px; }
+
+  .badge {
+    width: 26px; height: 26px; display: grid; place-items: center; border-radius: 8px;
+    border: var(--sl-bw-sm) solid var(--sl-ink); color: var(--sl-on-fill); font: 800 12.5px var(--font-mono);
+  }
+  .b-M { background: var(--sl-blue); } .b-A { background: var(--sl-green); }
+  .b-D { background: var(--sl-red); } .b-in { background: var(--sl-violet); }
+
+  .check {
+    appearance: none; width: 21px; height: 21px; margin: 0; flex: none; cursor: pointer; display: grid; place-items: center;
+    border: var(--sl-bw-sm) solid var(--sl-ink); border-radius: 7px; background: var(--sl-field);
+  }
+  .check:checked { background: var(--sl-ink); }
+  .check:checked::after { content: ""; width: 5px; height: 10px; margin-top: -2px; border: solid var(--sl-card); border-width: 0 3px 3px 0; transform: rotate(45deg); }
+
+  .mini {
+    border: var(--sl-bw-sm) solid var(--sl-ink); border-radius: 999px; background: var(--sl-card);
+    padding: 4px 11px; font-weight: 800; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
+  }
+  .mini:hover { box-shadow: 2px 2px 0 var(--sl-ink); }
+
+  .conflict-file { display: flex; align-items: center; gap: 10px; }
+  .conflict-file b { font-size: 14px; font-weight: 800; }
+  .conflict-file small { display: block; color: var(--sl-muted); font-size: 12px; font-weight: 500; }
+  .choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .choice {
+    padding: 8px 6px; border-radius: 999px; border: var(--sl-bw-sm) solid var(--sl-ink); background: var(--sl-field);
+    font-weight: 800; font-size: 12.5px; cursor: pointer; transition: transform .07s ease, box-shadow .07s ease;
+  }
+  .choice:hover { transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--sl-ink); }
+  .choice[aria-pressed="true"] { background: var(--sl-ink); color: var(--sl-card); }
+
+  .log-head { display: flex; align-items: center; }
+  .log-head .label { flex: 1; }
+  .log {
+    min-height: 120px; max-height: 190px; overflow: auto; padding: 14px 16px; border-radius: 14px;
+    background: var(--sl-log); border: var(--sl-bw) solid var(--sl-ink); color: var(--sl-log-text);
+    font: 500 12.5px/1.7 var(--font-mono);
+  }
+  .log .empty { font-style: italic; }
+  .log .ok { color: #7fe18b; } .log .up { color: #8ccaff; } .log .down { color: #c6abff; } .log .t { color: #6f6a5e; }
+
+  .sl-foot { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: var(--sl-muted); padding: 0 2px; }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 900px) { .window { grid-template-columns: 44px minmax(0, 1fr); } .editor { display: none; } }
+  @media (max-width: 520px) { .window { grid-template-columns: 1fr; } .ribbon { display: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Theme">
+      <span>Theme</span>
+      <button class="chip" type="button" data-theme-btn="light" aria-pressed="true">Light</button>
+      <button class="chip" type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+    </div>
+    <div class="seg" role="group" aria-label="Sidebar width">
+      <span>Sidebar</span>
+      <button class="chip" type="button" data-width="320" aria-pressed="false">320</button>
+      <button class="chip" type="button" data-width="380" aria-pressed="true">380</button>
+      <button class="chip" type="button" data-width="440" aria-pressed="false">440</button>
+    </div>
+    <button class="chip" type="button" id="reset">Reset demo</button>
+  </div>
+
+  <div class="window">
+    <nav class="ribbon" aria-hidden="true"><i></i><i></i><i class="on"></i><i></i></nav>
+
+    <main class="editor" aria-hidden="true">
+      <div class="crumb">Daily / 2026-10-04</div>
+      <h1>2026-10-04</h1>
+      <p>Sketched the SyncLab sidebar. One button, no surprises.</p>
+      <p>Synced from the train: phone and laptop matched without a single prompt. <span class="tag">#synclab</span></p>
+      <p>Next up: test conflict cards with a note edited on both devices.</p>
+    </main>
+
+    <aside class="synclab" aria-label="SyncLab">
+      <div class="sl-brand">
+        <div class="sl-path">dip/notes-vault</div>
+        <h1 class="sl-wordmark">Sync<span class="lab">Lab</span></h1>
+        <p class="sl-tagline">Review it. Hit sync. Done.</p>
+        <div class="sl-pills">
+          <span class="pill connected"><span class="dot"></span>Connected</span>
+          <span class="pill branch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="5" r="2.2"/><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="7" r="2.2"/><path d="M6 7.2v9.6M18 9.2c0 5-6 4-11 7.5"/></svg>main</span>
+        </div>
+      </div>
+
+      <section class="card">
+        <div class="card-head head-yellow">
+          <div class="titles">
+            <h2>Commit &amp; sync</h2>
+            <p id="ready-sub">Pull GitLab changes, push yours</p>
+          </div>
+          <span class="pill" id="ready-pill"><span class="dot"></span><span id="ready-count">4</span>&nbsp;ready</span>
+        </div>
+        <div class="card-body">
+          <label class="label" for="msg">Message <span style="font-weight:600;letter-spacing:.04em">(optional)</span></label>
+          <textarea class="field" id="msg" placeholder="Update daily notes and the roadmap"></textarea>
+          <p class="hint">Leave it empty and SyncLab writes one for you.</p>
+          <button class="sync" id="sync" type="button">
+            <span class="ico" aria-hidden="true">&#x27F3;</span>
+            <span class="text" id="sync-text">Sync</span>
+            <span class="counts"><span id="up">&#x2191; 3</span><span id="down">&#x2193; 1</span></span>
+          </button>
+        </div>
+      </section>
+
+      <section class="card" id="conflict-card">
+        <div class="card-head head-pink">
+          <div class="titles">
+            <h2>1 conflict</h2>
+            <p>Changed here and on GitLab</p>
+          </div>
+          <span class="pill"><span class="dot"></span>Needs you</span>
+        </div>
+        <div class="card-body">
+          <div class="conflict-file">
+            <span class="badge" style="background:var(--sl-orange)">!</span>
+            <div><b>plan.md</b><small>Projects · view diff</small></div>
+          </div>
+          <div class="choices" role="group" aria-label="Resolve conflict">
+            <button class="choice" type="button" data-keep="mine" aria-pressed="false">Mine</button>
+            <button class="choice" type="button" data-keep="theirs" aria-pressed="false">Theirs</button>
+            <button class="choice" type="button" data-keep="both" aria-pressed="false">Both</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="local-card">
+        <div class="card-head head-blue">
+          <div class="titles">
+            <h2>Your changes</h2>
+            <p>Edited in this vault</p>
+          </div>
+          <button class="mini" type="button" id="toggle-all">None</button>
+        </div>
+        <div class="card-body list" id="local-list">
+          <div class="row" data-dir="up"><input class="check" type="checkbox" checked aria-label="Include 2026-10-04.md"><span class="badge b-M">M</span><span class="name"><b>2026-10-04.md</b><small>Daily</small></span><span class="diff">+12 −3</span></div>
+          <div class="row" data-dir="up"><input class="check" type="checkbox" checked aria-label="Include synclab.md"><span class="badge b-A">A</span><span class="name"><b>synclab.md</b><small>Ideas</small></span><span class="diff">new</span></div>
+          <div class="row" data-dir="up"><input class="check" type="checkbox" checked aria-label="Include scratch.md"><span class="badge b-D">D</span><span class="name"><b>scratch.md</b><small>Old</small></span><span class="diff">deleted</span></div>
+        </div>
+      </section>
+
+      <section class="card" id="incoming-card">
+        <div class="card-head head-violet">
+          <div class="titles">
+            <h2>From GitLab</h2>
+            <p>Changed on another device</p>
+          </div>
+        </div>
+        <div class="card-body list" id="incoming-list">
+          <div class="row" data-dir="down"><input class="check" type="checkbox" checked aria-label="Include roadmap.md"><span class="badge b-in">&#x2193;</span><span class="name"><b>roadmap.md</b><small>Projects</small></span><span class="diff">+4 −1</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="log-head">
+          <div class="label">Activity</div>
+          <button class="mini" type="button" id="clear-log">Clear</button>
+        </div>
+        <div class="log" id="log" style="margin-top:10px"><div class="empty">Nothing synced yet. Press &#x27F3; Sync.</div></div>
+      </section>
+
+      <div class="sl-foot"><span id="last">Last synced 2 hours ago</span><span>laptop</span></div>
+    </aside>
+  </div>
+
+<script>
+  const initial = document.querySelector('.synclab').innerHTML;
+  const root = document.documentElement;
+  const win = document.querySelector('.window');
+
+  document.querySelectorAll('[data-theme-btn]').forEach(btn => btn.addEventListener('click', () => {
+    root.dataset.theme = btn.dataset.themeBtn;
+    document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+  }));
+  document.querySelectorAll('[data-width]').forEach(btn => btn.addEventListener('click', () => {
+    win.style.setProperty('--sidebar-w', btn.dataset.width + 'px');
+    document.querySelectorAll('[data-width]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+  }));
+  document.getElementById('reset').addEventListener('click', () => {
+    document.querySelector('.synclab').innerHTML = initial;
+    wire();
+  });
+
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const time = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+  function wire() {
+    const $ = id => document.getElementById(id);
+    const rows = () => [...document.querySelectorAll('.synclab .row')];
+    const sync = $('sync');
+    let conflictChoice = null;
+
+    function logLine(cls, text) {
+      const log = $('log');
+      log.querySelector('.empty')?.remove();
+      const line = document.createElement('div');
+      const t = document.createElement('span'); t.className = 't'; t.textContent = time() + '  ';
+      const m = document.createElement('span'); m.className = cls; m.textContent = text;
+      line.append(t, m); log.append(line); log.scrollTop = log.scrollHeight;
+    }
+
+    function refresh() {
+      const on = rows().filter(r => r.querySelector('input').checked);
+      rows().forEach(r => r.classList.toggle('off', !r.querySelector('input').checked));
+      const up = on.filter(r => r.dataset.dir === 'up').length + (conflictChoice === 'mine' ? 1 : 0);
+      const down = on.filter(r => r.dataset.dir === 'down').length + (conflictChoice === 'theirs' ? 1 : 0) + (conflictChoice === 'both' ? 1 : 0);
+      $('up').textContent = '↑ ' + up;
+      $('down').textContent = '↓ ' + down;
+      $('ready-count').textContent = String(up + down);
+      const locals = [...document.querySelectorAll('#local-list .check')];
+      if ($('toggle-all')) $('toggle-all').textContent = locals.length && locals.every(c => c.checked) ? 'None' : 'All';
+      if (!sync.classList.contains('busy') && !sync.classList.contains('done')) {
+        const empty = up + down === 0;
+        sync.classList.toggle('idle-empty', empty);
+        $('sync-text').textContent = empty ? (rows().length || document.getElementById('conflict-card') ? 'Nothing selected' : 'All up to date') : 'Sync';
+      }
+    }
+
+    document.querySelectorAll('.synclab .row').forEach(r => r.addEventListener('click', e => {
+      if (e.target.tagName !== 'INPUT') { const c = r.querySelector('input'); c.checked = !c.checked; }
+      refresh();
+    }));
+    $('toggle-all').addEventListener('click', () => {
+      const locals = [...document.querySelectorAll('#local-list .check')];
+      const next = !locals.every(c => c.checked);
+      locals.forEach(c => { c.checked = next; });
+      refresh();
+    });
+    document.querySelectorAll('.choice').forEach(b => b.addEventListener('click', () => {
+      conflictChoice = conflictChoice === b.dataset.keep ? null : b.dataset.keep;
+      document.querySelectorAll('.choice').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.keep === conflictChoice)));
+      refresh();
+    }));
+    $('clear-log').addEventListener('click', () => {
+      $('log').innerHTML = '<div class="empty">Log cleared.</div>';
+    });
+
+    sync.addEventListener('click', async () => {
+      if (sync.classList.contains('busy') || sync.classList.contains('idle-empty')) return;
+      const picked = rows().filter(r => r.querySelector('input').checked);
+      const total = picked.length + (conflictChoice ? 1 : 0);
+      sync.classList.add('busy');
+      $('sync-text').textContent = 'Checking…';
+      logLine('', 'Checking GitLab · main @ 8f3c2e1');
+      await wait(700);
+      let i = 0;
+      for (const r of picked.filter(x => x.dataset.dir === 'down')) {
+        $('sync-text').textContent = 'Syncing ' + (++i) + '/' + total;
+        logLine('down', '↓ pulled ' + r.querySelector('small').textContent + '/' + r.querySelector('b').textContent);
+        await wait(450);
+      }
+      if (conflictChoice) {
+        $('sync-text').textContent = 'Syncing ' + (++i) + '/' + total;
+        const msg = { mine: '↑ kept yours: Projects/plan.md', theirs: '↓ kept GitLab’s: Projects/plan.md (yours in trash)', both: '↓ kept both: Projects/plan (GitLab).md' }[conflictChoice];
+        logLine(conflictChoice === 'mine' ? 'up' : 'down', msg);
+        await wait(450);
+      }
+      const ups = picked.filter(x => x.dataset.dir === 'up');
+      if (ups.length || conflictChoice === 'mine') {
+        $('sync-text').textContent = 'Pushing ' + total + '/' + total;
+        await wait(600);
+        logLine('up', '↑ committed ' + (ups.length + (conflictChoice === 'mine' ? 1 : 0)) + ' file(s) · a41b9c0');
+      }
+      picked.forEach(r => r.remove());
+      if (conflictChoice) $('conflict-card').remove();
+      ['local-card', 'incoming-card'].forEach(id => {
+        const card = $(id);
+        if (card && !card.querySelector('.row')) card.remove();
+      });
+      sync.classList.remove('busy'); sync.classList.add('done');
+      $('sync-text').textContent = 'Synced ✓';
+      logLine('ok', '✓ all synced');
+      $('last').textContent = 'Last synced just now';
+      await wait(1500);
+      sync.classList.remove('done');
+      conflictChoice = null;
+      refresh();
+    });
+
+    refresh();
+  }
+  wire();
+</script>
+</body>
+</html>

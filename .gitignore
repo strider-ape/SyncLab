@@ -1,0 +1,15 @@
+node_modules/
+main.js
+main.css
+styles.css
+*.map
+.env
+.env.*
+!.env.example
+data.json
+.DS_Store
+coverage/
+dev/preview/build/
+
+# Local Claude Code / editor config (machine-specific paths)
+.claude/
