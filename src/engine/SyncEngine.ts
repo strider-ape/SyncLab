@@ -77,6 +77,8 @@ interface Gathered {
 	firstSync: boolean;
 }
 
+type Download = { bytes: ArrayBuffer } | { error: unknown };
+
 interface PreparedAction {
 	action: CommitAction;
 	kind: 'add' | 'update' | 'delete' | 'move';
@@ -89,6 +91,7 @@ interface PreparedAction {
 const MAX_ATTEMPTS = 3;
 const MAX_COMMIT_BYTES = 15 * 1024 * 1024;
 const HASH_CONCURRENCY = 8;
+const PULL_CONCURRENCY = 6;
 const LOG_LIMIT = 200;
 
 function initialState(): EngineState {
@@ -317,32 +320,49 @@ export class SyncEngine {
 	}
 
 	private async applyPulls(config: EngineConfig, items: PullItem[], files: Map<RepoPath, BlobId>, summary: SyncSummary): Promise<void> {
-		for (const item of items) {
-			try {
-				const current = await this.localBlob(config, item.path);
-				if (current !== item.localBlob) {
-					summary.skipped++;
-					this.log('warn', `${item.path} changed while syncing. It'll be picked up next time.`);
-				} else if (item.op === 'delete') {
-					await config.local.trash(item.path);
-					files.delete(item.path);
-					summary.deleted++;
-					this.log('down', `Moved ${item.path} to trash (deleted on GitLab)`);
-				} else {
-					const expected = item.remoteBlob as BlobId;
-					const bytes = await config.remote.blob(expected);
-					if ((await gitBlobId(bytes)) !== expected) throw new Error('the download was incomplete or damaged');
-					if (item.backupLocal && current !== undefined) await config.local.trash(item.path);
-					await config.local.write(item.path, bytes);
-					files.set(item.path, expected);
-					summary.pulled++;
-					this.log('down', `${item.backupLocal ? 'Took GitLab\'s version of' : 'Pulled'} ${item.path}`);
-				}
-			} catch (error) {
-				summary.failed++;
-				this.log('error', `Couldn't pull ${item.path}: ${describeError(error)}`);
+		// Downloads run a few at a time (a first sync on a new device can be
+		// hundreds of files), but writes stay one at a time and each re-checks
+		// the vault right before it happens. Small batches keep memory bounded.
+		for (let start = 0; start < items.length; start += PULL_CONCURRENCY) {
+			const batch = items.slice(start, start + PULL_CONCURRENCY);
+			const downloads = await Promise.all(batch.map(item => (item.op === 'delete'
+				? Promise.resolve(null)
+				: config.remote.blob(item.remoteBlob as BlobId).then(
+					(bytes): Download => ({ bytes }),
+					(error: unknown): Download => ({ error }),
+				))));
+			for (const [index, item] of batch.entries()) {
+				await this.applyPull(config, item, downloads[index] ?? null, files, summary);
+				this.step();
 			}
-			this.step();
+		}
+	}
+
+	private async applyPull(config: EngineConfig, item: PullItem, download: Download | null, files: Map<RepoPath, BlobId>, summary: SyncSummary): Promise<void> {
+		try {
+			const current = await this.localBlob(config, item.path);
+			if (current !== item.localBlob) {
+				summary.skipped++;
+				this.log('warn', `${item.path} changed while syncing. It'll be picked up next time.`);
+			} else if (item.op === 'delete') {
+				await config.local.trash(item.path);
+				files.delete(item.path);
+				summary.deleted++;
+				this.log('down', `Moved ${item.path} to trash (deleted on GitLab)`);
+			} else {
+				if (!download) throw new Error('nothing was downloaded');
+				if ('error' in download) throw download.error;
+				const expected = item.remoteBlob as BlobId;
+				if ((await gitBlobId(download.bytes)) !== expected) throw new Error('the download was incomplete or damaged');
+				if (item.backupLocal && current !== undefined) await config.local.trash(item.path);
+				await config.local.write(item.path, download.bytes);
+				files.set(item.path, expected);
+				summary.pulled++;
+				this.log('down', `${item.backupLocal ? 'Took GitLab\'s version of' : 'Pulled'} ${item.path}`);
+			}
+		} catch (error) {
+			summary.failed++;
+			this.log('error', `Couldn't pull ${item.path}: ${describeError(error)}`);
 		}
 	}
 

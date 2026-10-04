@@ -33,6 +33,9 @@ export class FakeGitLab implements RemoteRepo {
 	readonly commits: FakeCommit[] = [];
 	readonly blobs = new Map<BlobId, Uint8Array>();
 	calls = { head: 0, tree: 0, blob: 0, fileInfo: 0, commit: 0 };
+	/** Downloads in progress right now, and the most seen at once. */
+	inFlight = 0;
+	maxInFlight = 0;
 	/** Runs once, right before the next commit is validated (simulates a racing writer). */
 	beforeNextCommit?: () => Promise<void>;
 	/** Make the next commit fail with a network error, either before or after it lands. */
@@ -54,6 +57,10 @@ export class FakeGitLab implements RemoteRepo {
 
 	async blob(id: BlobId): Promise<ArrayBuffer> {
 		this.calls.blob++;
+		this.inFlight++;
+		this.maxInFlight = Math.max(this.maxInFlight, this.inFlight);
+		await new Promise(resolve => setTimeout(resolve, 0));
+		this.inFlight--;
 		const data = this.blobs.get(id);
 		if (!data) throw new GitLabError('not-found', `No blob ${id}`, 404);
 		return data.slice().buffer;

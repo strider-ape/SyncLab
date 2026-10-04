@@ -39,6 +39,24 @@ describe('first sync', () => {
 		expect(remote.commits).toHaveLength(1);
 	});
 
+	it('pulls an existing GitLab project into an empty vault on a new device', async () => {
+		const remote = new FakeGitLab();
+		const notes: Record<string, string | Uint8Array> = { 'Attachments/picture.bin': Uint8Array.from({ length: 5000 }, (_, i) => i % 251) };
+		for (let i = 0; i < 40; i++) notes[`Area ${i % 5}/Topic/note ${i}.md`] = `# Note ${i}
+`;
+		await remote.externalCommit(notes);
+		const phone = makeDevice(remote, { deviceId: 'phone' });
+
+		const summary = await synced(phone);
+
+		expect(summary).toMatchObject({ pulled: 41, pushed: 0, deleted: 0, conflicts: 0, failed: 0 });
+		expect(phone.vault.snapshot()).toEqual(remote.files());
+		expect(remote.commits).toHaveLength(1);
+		expect(remote.maxInFlight).toBeGreaterThan(1);
+		expect(remote.maxInFlight).toBeLessThanOrEqual(6);
+		expect((await synced(phone)).pulled).toBe(0);
+	});
+
 	it('never deletes anything when there is no sync history', async () => {
 		const remote = new FakeGitLab();
 		await remote.externalCommit({ 'only-remote.md': 'x' });
