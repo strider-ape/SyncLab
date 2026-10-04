@@ -169,6 +169,9 @@ describe('one-sided changes', () => {
 
 		expect(remote.commits.length).toBe(before + 1);
 		expect(remote.files()).toEqual(map({ 'new/name.md': 'content', 'other.md': 'y' }));
+		expect(remote.commits.at(-1)?.message).toBe(
+			'Update 1 file, move 1 file\n\nUpdated:\n- other.md\n\nMoved:\n- old/name.md → new/name.md\n\nSynced with SyncLab from test device',
+		);
 	});
 
 	it('preserves bytes exactly, including CRLF, BOM and binary data', async () => {

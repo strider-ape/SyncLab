@@ -22,6 +22,7 @@ interface FakeCommit {
 	files: Map<RepoPath, BlobId>;
 	lastCommit: Map<RepoPath, string>;
 	message: string;
+	actions: CommitAction[];
 }
 
 /**
@@ -155,7 +156,7 @@ export class FakeGitLab implements RemoteRepo {
 		}
 
 		for (const path of touched) if (files.has(path)) lastCommit.set(path, id);
-		this.commits.push({ id, files, lastCommit, message });
+		this.commits.push({ id, files, lastCommit, message, actions });
 		return id;
 	}
 }

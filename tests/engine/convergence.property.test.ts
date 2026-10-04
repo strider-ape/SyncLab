@@ -83,6 +83,15 @@ describe('two devices and GitLab', () => {
 				]);
 				for (const version of mustSurvive) expect(recoverable.has(version), `lost "${version}"`).toBe(true);
 
+				// Every commit message names exactly the files that commit changed.
+				for (const commit of remote.commits.filter(c => c.message.includes('Synced with SyncLab'))) {
+					const named = commit.actions.map(a => (a.action === 'move' ? `${a.previous_path} → ${a.file_path}` : a.file_path));
+					const listed = commit.message.split('\n').filter(line => line.startsWith('- ')).map(line => line.slice(2));
+					if (listed.length) expect([...listed].sort()).toEqual([...named].sort());
+					else expect(named).toHaveLength(1);
+					for (const a of commit.actions) expect(commit.message).toContain(a.file_path.split('/').pop() as string);
+				}
+
 				// Idempotency: nothing left to do on either device.
 				const commits = remote.commits.length;
 				const writes = devices.map(d => d.vault.writes);

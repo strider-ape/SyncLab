@@ -4,6 +4,7 @@ import { buildPlan, computeChanges, countDeletions } from '../core/planner';
 import type { Attention, BlobId, Change, PullItem, PushItem, RepoPath, Resolution } from '../core/types';
 import { GitLabError, type CommitAction } from '../gitlab/GitLabClient';
 import { toBase64 } from './base64';
+import { buildCommitMessage } from './commitMessage';
 import type { LocalFs, RemoteRepo, StatePersistence, StoredState } from './ports';
 import { Store } from './store';
 
@@ -405,7 +406,8 @@ export class SyncEngine {
 
 			let result: { id: string };
 			try {
-				result = await config.remote.commit(commitMessage(message, chunk, config.deviceName, index, chunks.length), chunk.map(a => a.action));
+				const actions = chunk.map(a => a.action);
+				result = await config.remote.commit(buildCommitMessage(actions, { message, deviceName: config.deviceName, part: { index, count: chunks.length } }), actions);
 			} catch (error) {
 				if (error instanceof GitLabError && (error.kind === 'rejected' || error.kind === 'network')) {
 					throw new RemoteMovedError(error.message, error);
@@ -561,24 +563,6 @@ function chunkBySize(actions: PreparedAction[], maxBytes: number): PreparedActio
 	}
 	if (current.length) chunks.push(current);
 	return chunks;
-}
-
-export function commitMessage(message: string | undefined, actions: PreparedAction[], deviceName: string, index = 0, count = 1): string {
-	let subject = message?.trim() ?? '';
-	if (!subject) {
-		const counts = { add: 0, update: 0, delete: 0, move: 0 };
-		for (const a of actions) counts[a.kind]++;
-		const parts: string[] = [];
-		const files = (n: number) => `${n} file${n === 1 ? '' : 's'}`;
-		if (counts.update) parts.push(`update ${files(counts.update)}`);
-		if (counts.add) parts.push(`add ${files(counts.add)}`);
-		if (counts.move) parts.push(`move ${files(counts.move)}`);
-		if (counts.delete) parts.push(`delete ${files(counts.delete)}`);
-		subject = parts.join(', ');
-		subject = subject.charAt(0).toUpperCase() + subject.slice(1);
-	}
-	if (count > 1) subject += ` (part ${index + 1} of ${count})`;
-	return deviceName.trim() ? `${subject}\n\nSynced with SyncLab from ${deviceName.trim()}` : subject;
 }
 
 function describeSummary(s: SyncSummary): string {
