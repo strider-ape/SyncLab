@@ -116,4 +116,11 @@ The design and the reasoning behind it are in [docs/PLAN.md](docs/PLAN.md).
 
 ## License
 
-MIT. SyncLab bundles the [Lexend](https://www.lexend.com/) typeface under the SIL Open Font License 1.1.
+SyncLab is free and unencumbered software released into the **public domain** under [The Unlicense](https://github.com/strider-ape/SyncLab/blob/main/LICENSE). Copy it, change it, build your own version or sell it. No permission or credit needed.
+
+It ships with a few open source pieces that keep their own permissive licenses:
+- Svelte, esm-env and ignore (MIT);
+- diff (BSD-3-Clause);
+- the [Lexend](https://www.lexend.com/) typeface (SIL Open Font License).
+
+Their notices are in [THIRD-PARTY-NOTICES.md](https://github.com/strider-ape/SyncLab/blob/main/THIRD-PARTY-NOTICES.md) and at the top of the release files.

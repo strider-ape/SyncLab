@@ -19,7 +19,7 @@
 		"gitlab",
 		"sync"
 	],
-	"license": "MIT",
+	"license": "Unlicense",
 	"dependencies": {
 		"diff": "^9.0.0",
 		"ignore": "^7.0.12",

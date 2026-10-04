@@ -1,5 +1,6 @@
 import { readFileSync, watch, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { IN_STYLES_CSS, noticeComment } from './third-party-notices.mjs';
 
 const require = createRequire(import.meta.url);
 const SOURCE = 'src/styles/synclab.css';
@@ -14,7 +15,7 @@ const LATIN = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U
  */
 export async function buildCss() {
 	const font = readFileSync(FONT).toString('base64');
-	const fontFace = `/* Lexend by Thomas Jockin et al., SIL Open Font License 1.1 */
+	const fontFace = `${noticeComment(IN_STYLES_CSS)}
 @font-face {
 	font-family: "SyncLab Lexend";
 	font-style: normal;
