@@ -91,6 +91,10 @@ Repeat steps 1 and 2 on each device and pick the same project and branch. The to
 
 SyncLab needs a GitLab account and connects **only to the GitLab server you configure**. It sends requests there to list, read and write files in the project and branch you chose. It has no telemetry, no analytics and no other network requests. The font it uses is bundled with the plugin.
 
+**Vault access.** To know what changed, SyncLab lists and reads the files in the folder you sync (or the whole vault, if that's what you chose) and compares them with GitLab. It writes or trashes files only when a sync brings in a change. It never touches the `.obsidian` folder or other dot-folders.
+
+**Release files you can verify.** Each release's `main.js`, `styles.css` and `manifest.json` carry a signed GitHub build attestation, so you can check they were built from this repository. Use `gh attestation verify main.js --repo strider-ape/SyncLab`.
+
 ## Development
 
 ```bash

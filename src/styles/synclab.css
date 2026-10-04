@@ -51,6 +51,11 @@
 	--sl-radius-sm: 8px;
 	--sl-shadow: 6px 6px 0 var(--sl-shade);
 	--sl-shadow-sm: 3px 3px 0 var(--sl-shade);
+	/* Motion: all of it turns off for people who prefer reduced motion (see the end of this file) */
+	--sl-ease: 0.07s ease;
+	--sl-ease-slow: 0.3s ease;
+	--sl-stripes: synclab-stripes 0.6s linear infinite;
+	--sl-spin: synclab-spin 1s linear infinite;
 	--sl-font: "SyncLab Lexend", var(--font-interface);
 	--sl-mono: var(--font-monospace);
 
@@ -254,7 +259,7 @@
 	font: 500 14px/1.5 var(--sl-font);
 	box-shadow: none;
 	outline: none;
-	transition: box-shadow 0.1s ease;
+	transition: box-shadow var(--sl-ease);
 }
 .synclab textarea.sl-field { min-height: 62px; resize: vertical; }
 .synclab .sl-field:focus,
@@ -281,9 +286,8 @@
 	font: 800 13px var(--sl-font);
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
-	text-decoration: none;
 	cursor: pointer;
-	transition: transform 0.07s ease, box-shadow 0.07s ease;
+	transition: transform var(--sl-ease), box-shadow var(--sl-ease);
 }
 .synclab button.sl-btn:hover { background: var(--sl-card); }
 .synclab .sl-btn .sl-btn-icon { display: inline-grid; place-items: center; }
@@ -349,7 +353,7 @@
 	letter-spacing: 0.05em;
 	text-transform: uppercase;
 	cursor: pointer;
-	transition: transform 0.07s ease, box-shadow 0.07s ease;
+	transition: transform var(--sl-ease), box-shadow var(--sl-ease);
 }
 .synclab button.sl-sync:hover { background: var(--sl-green); }
 .synclab button.sl-sync:active:not(.is-busy) { transform: translate(5px, 5px); box-shadow: 0 0 0 var(--sl-shade); }
@@ -366,7 +370,7 @@
 	color: var(--sl-chip-text);
 	border: 2px solid var(--sl-chip-text);
 }
-.synclab button.sl-sync .sl-progress { position: absolute; inset: 0 auto 0 0; background: rgba(17, 17, 17, 0.12); transition: width 0.3s ease; }
+.synclab button.sl-sync .sl-progress { position: absolute; inset: 0 auto 0 0; background: rgba(17, 17, 17, 0.12); transition: width var(--sl-ease-slow); }
 .synclab button.sl-sync .sl-sync-icon,
 .synclab button.sl-sync .sl-sync-label,
 .synclab button.sl-sync .sl-counts { position: relative; }
@@ -374,9 +378,9 @@
 	cursor: progress;
 	background-image: repeating-linear-gradient(-45deg, rgba(17, 17, 17, 0.12) 0 12px, transparent 12px 24px);
 	background-size: 34px 34px;
-	animation: synclab-stripes 0.6s linear infinite;
+	animation: var(--sl-stripes);
 }
-.synclab button.sl-sync.is-busy .sl-sync-icon { animation: synclab-spin 1s linear infinite; }
+.synclab button.sl-sync.is-busy .sl-sync-icon { animation: var(--sl-spin); }
 .synclab button.sl-sync.is-done { background: var(--sl-yellow); }
 .synclab button.sl-sync.is-quiet { background: var(--sl-card); color: var(--sl-text); border-color: var(--sl-ink); font-size: 17px; box-shadow: var(--sl-shadow-sm); }
 @keyframes synclab-stripes { to { background-position: 34px 0; } }
@@ -393,7 +397,7 @@
 	border: var(--sl-bw-sm) solid var(--sl-ink);
 	border-radius: var(--sl-radius-md);
 	background: var(--sl-field);
-	transition: transform 0.08s ease, box-shadow 0.08s ease;
+	transition: transform var(--sl-ease), box-shadow var(--sl-ease);
 }
 .synclab .sl-row:hover { transform: translate(-2px, -2px); box-shadow: var(--sl-shadow-sm); }
 .synclab .sl-row.is-off { opacity: 0.45; }
@@ -411,7 +415,7 @@
 }
 .synclab .sl-name b { display: block; font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .synclab .sl-name small { display: block; font-size: 11.5px; color: var(--sl-muted); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.synclab .sl-name:hover b { text-decoration: underline; text-decoration-thickness: 2px; }
+.synclab .sl-name:hover b { color: var(--sl-focus); }
 .synclab .sl-row .sl-tag { font: 700 11px var(--sl-mono); color: var(--sl-muted); white-space: nowrap; }
 
 .synclab .sl-badge {
@@ -486,7 +490,7 @@
 	box-shadow: none;
 	font: 800 12px var(--sl-font);
 	cursor: pointer;
-	transition: transform 0.07s ease, box-shadow 0.07s ease;
+	transition: transform var(--sl-ease), box-shadow var(--sl-ease);
 }
 .synclab button.sl-choice:hover { transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--sl-shade); background: var(--sl-field); }
 .synclab button.sl-choice[aria-pressed="true"],
@@ -607,10 +611,10 @@
 .synclab .sl-diff-legend { display: flex; gap: 10px; flex-wrap: wrap; }
 
 @media (prefers-reduced-motion: reduce) {
-	.synclab *,
-	.synclab *::before,
-	.synclab *::after {
-		animation: none !important;
-		transition: none !important;
+	.synclab {
+		--sl-ease: 0s linear;
+		--sl-ease-slow: 0s linear;
+		--sl-stripes: none;
+		--sl-spin: none;
 	}
 }

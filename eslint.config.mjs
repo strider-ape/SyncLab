@@ -4,7 +4,7 @@ import globals from 'globals';
 import { globalIgnores } from 'eslint/config';
 
 export default tseslint.config(
-	globalIgnores(['node_modules/', 'main.js', 'styles.css', 'docs/', 'dev/', '**/*.svelte']),
+	globalIgnores(['node_modules/', 'main.js', 'styles.css', 'docs/', 'dev/preview/build/', '**/*.svelte']),
 	{
 		languageOptions: {
 			globals: { ...globals.browser },

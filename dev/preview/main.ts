@@ -4,13 +4,14 @@ import { mount, unmount } from 'svelte';
 import Sidebar from '../../src/ui/components/Sidebar.svelte';
 import Wizard from '../../src/ui/components/Wizard.svelte';
 import DiffView from '../../src/ui/components/DiffView.svelte';
+import type { Change } from '../../src/core/types';
 import { Store } from '../../src/engine/store';
 import { TokenModal } from '../../src/ui/modals';
 import { GitLabError, type GitLabClient, type GitLabProject } from '../../src/gitlab/GitLabClient';
 import type { HostInfo, SidebarHost } from '../../src/ui/host';
 import { FakeGitLab, makeDevice, type Device } from '../../tests/support/fakes';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise(resolve => window.setTimeout(resolve, ms));
 
 const BASE: Record<string, string> = {
 	'Daily/2026-10-03.md': '# Friday\n\nShipped the plan.\n',
@@ -120,6 +121,14 @@ function openWizard() {
 	});
 }
 
+async function showDiff(device: Device, change: Change): Promise<void> {
+	const content = await device.engine.contents(change);
+	closeModal();
+	modalLayer.hidden = false;
+	modalTarget.parentElement?.classList.add('is-wide');
+	modal = mount(DiffView, { target: modalTarget, props: { path: change.path, remote: content.remote, local: content.local, onClose: closeModal } });
+}
+
 async function start() {
 	if (sidebar) await unmount(sidebar);
 	sidebarTarget.replaceChildren();
@@ -127,15 +136,10 @@ async function start() {
 	const host: SidebarHost = {
 		engine: device.engine,
 		info,
-		sync: request => device.engine.sync({ ...request, confirmDeletions: async n => window.confirm(`Delete ${n} files?`) }),
+		// The preview always approves deletions; the plugin asks in a modal.
+		sync: request => device.engine.sync({ ...request, confirmDeletions: async () => true }),
 		refresh: () => void device.engine.refresh(),
-		openDiff: async change => {
-			const content = await device.engine.contents(change);
-			closeModal();
-			modalLayer.hidden = false;
-			modalTarget.parentElement?.classList.add('is-wide');
-			modal = mount(DiffView, { target: modalTarget, props: { path: change.path, remote: content.remote, local: content.local, onClose: closeModal } });
-		},
+		openDiff: change => void showDiff(device, change),
 		openFile: () => undefined,
 		openSetup: openWizard,
 		replaceToken: () => undefined,
@@ -144,16 +148,11 @@ async function start() {
 	};
 	if (new URLSearchParams(location.search).has('showcase')) {
 		// The same sidebar twice, light and dark side by side (used for README images).
-		const row = document.createElement('div');
-		row.className = 'showcase';
+		const row = document.body.createDiv({ cls: 'showcase' });
 		for (const theme of ['theme-light', 'theme-dark']) {
-			const pane = row.appendChild(document.createElement('div'));
-			pane.className = `showcase-pane ${theme}`;
-			const target = pane.appendChild(document.createElement('div'));
-			target.className = 'synclab synclab-host';
+			const target = row.createDiv({ cls: `showcase-pane ${theme}` }).createDiv({ cls: 'synclab synclab-host' });
 			mount(Sidebar, { target, props: { host } });
 		}
-		document.body.appendChild(row);
 		return;
 	}
 	sidebar = mount(Sidebar, { target: sidebarTarget, props: { host } });

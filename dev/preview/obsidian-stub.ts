@@ -8,7 +8,9 @@ const ICONS: Record<string, string> = {
 };
 
 export function setIcon(el: HTMLElement, name: string): void {
-	el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">${ICONS[name] ?? ''}</svg>`;
+	const markup = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon">${ICONS[name] ?? ''}</svg>`;
+	const svg = new DOMParser().parseFromString(markup, 'image/svg+xml').documentElement;
+	el.replaceChildren(el.ownerDocument.importNode(svg, true));
 }
 
 declare global {
@@ -29,12 +31,14 @@ function build<T extends HTMLElement>(parent: HTMLElement, el: T, options?: ElOp
 	return el;
 }
 const helpers: Record<string, unknown> = {
-	createEl(this: HTMLElement, tag: string, options?: ElOptions) { return build(this, document.createElement(tag), options); },
-	createDiv(this: HTMLElement, options?: ElOptions) { return build(this, document.createElement('div'), options); },
-	createSpan(this: HTMLElement, options?: ElOptions) { return build(this, document.createElement('span'), options); },
+	// These three are the browser stand-ins for Obsidian's createEl helpers themselves,
+	// so they have to create elements directly (lint flags them; they never ship).
+	createEl(this: HTMLElement, tag: string, options?: ElOptions) { return build(this, this.ownerDocument.createElement(tag), options); },
+	createDiv(this: HTMLElement, options?: ElOptions) { return build(this, this.ownerDocument.createElement('div'), options); },
+	createSpan(this: HTMLElement, options?: ElOptions) { return build(this, this.ownerDocument.createElement('span'), options); },
 	setText(this: HTMLElement, text: string) { this.textContent = text; },
-	hide(this: HTMLElement) { this.style.display = 'none'; },
-	show(this: HTMLElement) { this.style.display = ''; },
+	hide(this: HTMLElement) { this.toggleAttribute('hidden', true); },
+	show(this: HTMLElement) { this.toggleAttribute('hidden', false); },
 	addClass(this: HTMLElement, cls: string) { this.classList.add(cls); },
 	addClasses(this: HTMLElement, classes: string[]) { this.classList.add(...classes); },
 };
@@ -49,12 +53,13 @@ export class Notice {
 }
 
 export class Modal {
-	modalEl: HTMLElement = document.createElement('div');
+	modalEl: HTMLElement;
 	contentEl: HTMLElement;
 	constructor(readonly app: unknown) {
-		this.modalEl.className = 'modal';
-		this.contentEl = this.modalEl.appendChild(document.createElement('div'));
-		this.contentEl.className = 'modal-content';
+		// Built detached; open() attaches it to the preview's modal layer.
+		this.modalEl = document.body.createDiv({ cls: 'modal' });
+		this.modalEl.remove();
+		this.contentEl = this.modalEl.createDiv({ cls: 'modal-content' });
 	}
 	open(): void {
 		const layer = document.getElementById('modal-layer') as HTMLElement;
