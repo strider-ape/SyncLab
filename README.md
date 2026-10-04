@@ -93,6 +93,8 @@ SyncLab needs a GitLab account and connects **only to the GitLab server you conf
 
 **Vault access.** To know what changed, SyncLab lists and reads the files in the folder you sync (or the whole vault, if that's what you chose) and compares them with GitLab. It writes or trashes files only when a sync brings in a change. It never touches the `.obsidian` folder or other dot-folders.
 
+**Base64, and only for uploads.** GitLab's commit API takes file contents as base64 text, so SyncLab encodes each file it uploads. That's what keeps images, PDFs and other binary files byte-exact. It's the only place SyncLab uses base64, and it never decodes or runs anything.
+
 **Release files you can verify.** Each release's `main.js`, `styles.css` and `manifest.json` carry a signed GitHub build attestation, so you can check they were built from this repository. Use `gh attestation verify main.js --repo strider-ape/SyncLab`.
 
 ## Development

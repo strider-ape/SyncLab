@@ -6,7 +6,6 @@ import Wizard from '../../src/ui/components/Wizard.svelte';
 import DiffView from '../../src/ui/components/DiffView.svelte';
 import type { Change } from '../../src/core/types';
 import { Store } from '../../src/engine/store';
-import { TokenModal } from '../../src/ui/modals';
 import { GitLabError, type GitLabClient, type GitLabProject } from '../../src/gitlab/GitLabClient';
 import type { HostInfo, SidebarHost } from '../../src/ui/host';
 import { FakeGitLab, makeDevice, type Device } from '../../tests/support/fakes';
@@ -148,11 +147,10 @@ async function start() {
 	};
 	if (new URLSearchParams(location.search).has('showcase')) {
 		// The same sidebar twice, light and dark side by side (used for README images).
-		const row = document.body.createDiv({ cls: 'showcase' });
-		for (const theme of ['theme-light', 'theme-dark']) {
-			const target = row.createDiv({ cls: `showcase-pane ${theme}` }).createDiv({ cls: 'synclab synclab-host' });
-			mount(Sidebar, { target, props: { host } });
-		}
+		document.body.classList.add('preview-showcase');
+		const showcase = document.getElementById('showcase') as HTMLElement;
+		showcase.hidden = false;
+		for (const target of showcase.querySelectorAll<HTMLElement>('.synclab-host')) mount(Sidebar, { target, props: { host } });
 		return;
 	}
 	sidebar = mount(Sidebar, { target: sidebarTarget, props: { host } });
@@ -192,16 +190,6 @@ void start().then(async () => {
 			[...root.querySelectorAll<HTMLButtonElement>('.sl-choice')].find(b => b.textContent?.trim() === 'Both')?.click();
 			root.querySelector<HTMLInputElement>('.sl-row .sl-check')?.click();
 		}
-	}
-	if (params.get('show') === 'token') {
-		document.body.classList.add('preview-wizard');
-		new TokenModal({} as never, {
-			hasToken: true,
-			tokenPageUrl: 'https://gitlab.com/-/user_settings/personal_access_tokens',
-			openUrl: url => void window.open(url),
-			check: async token => { await delay(400); if (token.length < 12) throw new GitLabError('unauthorized', 'rejected', 401); return 'dip'; },
-			save: async () => undefined,
-		}).open();
 	}
 	if (params.get('show') === 'wizard') {
 		document.body.classList.add('preview-wizard');

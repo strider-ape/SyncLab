@@ -26,9 +26,10 @@
 	.preview-wizard .frame { display: none; }
 	.preview-wizard #modal-layer { background: transparent; place-items: start center; }
 	.showcase { display: flex; gap: 28px; align-items: flex-start; }
+	.showcase[hidden] { display: none; }
 	.showcase-pane { width: 380px; border-radius: 18px; overflow: hidden; border: 1px solid rgba(0, 0, 0, 0.18); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14); }
-	body:has(.showcase) { padding: 28px; background: #e9e6df; }
-	body:has(.showcase) .toolbar, body:has(.showcase) .frame { display: none; }
+	body.preview-showcase { padding: 28px; background: #e9e6df; }
+	.preview-showcase .toolbar, .preview-showcase .frame { display: none; }
 	#modal-layer { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); display: grid; place-items: center; padding: 16px; overflow: auto; }
 	#modal-layer[hidden] { display: none; }
 	@media (max-width: 760px) { .frame { grid-template-columns: minmax(0, 1fr); } .editor { display: none; } }
@@ -43,6 +44,10 @@
 	<div class="frame">
 		<div class="editor"><h1>2026-10-04</h1><p>Sketched the SyncLab sidebar. One button, no surprises.</p></div>
 		<div class="workspace-leaf-content"><div class="view-content synclab synclab-host" id="sidebar"></div></div>
+	</div>
+	<div class="showcase" id="showcase" hidden>
+		<div class="showcase-pane theme-light"><div class="synclab synclab-host"></div></div>
+		<div class="showcase-pane theme-dark"><div class="synclab synclab-host"></div></div>
 	</div>
 	<div id="modal-layer" hidden><div class="modal synclab synclab-modal"><div class="modal-content" id="modal"></div></div></div>
 	<script type="module" src="build/preview.js"></script>
