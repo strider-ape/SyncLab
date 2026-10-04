@@ -109,7 +109,7 @@ Click a row to open its diff. Right-click a row for *Open file*, *Discard local 
   - a tilted yellow "LAB" wordmark block and tilted status pills;
   - a dark activity log.
 - **Type:** Lexend (variable, SIL OFL), bundled into `styles.css` as a data URI so nothing is fetched at runtime. Headings and labels use heavy weights; status letters are monospace.
-- **Light and dark:** SyncLab owns its palette inside its own panels. With `.theme-dark` it switches to charcoal with cream outlines and keeps the same coloured headers.
+- **Light and dark:** SyncLab owns its palette inside its own panels. With `.theme-dark` it switches to warm charcoal surfaces with mid-grey outlines, black hard shadows, slightly toned fills, and near-black outlines on coloured fills, so text stays the brightest thing on screen. `tests/ui/contrast.test.ts` checks every colour pairing in both themes against WCAG contrast (7:1 body text, 4.5:1 other text, 3:1 outlines and states).
 - **Status colours** are saturated flat fills, defined once as `--sl-*` tokens with a dark-mode set:
 
   | Status | Colour |

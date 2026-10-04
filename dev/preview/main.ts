@@ -158,4 +158,39 @@ document.getElementById('show-welcome')?.addEventListener('click', () => {
 document.getElementById('reset')?.addEventListener('click', () => void start());
 modalLayer.addEventListener('click', event => { if (event.target === modalLayer) closeModal(); });
 
-void start();
+// URL options so a headless browser can screenshot any state, e.g.
+// index.html?theme=dark&full=1&demo=states   or   index.html?theme=light&show=wizard
+const params = new URLSearchParams(location.search);
+if (params.get('theme') === 'dark') {
+	document.body.classList.add('theme-dark');
+	document.body.classList.remove('theme-light');
+}
+if (params.has('full')) document.body.classList.add('preview-full');
+const sidebarWidth = Number(params.get('width'));
+if (sidebarWidth > 0) document.documentElement.style.setProperty('--preview-sidebar', `${sidebarWidth}px`);
+
+void start().then(async () => {
+	await delay(50);
+	if (params.get('demo') === 'states') {
+		// One screenshot shows a selected choice, a ticked row and an unticked row.
+		[...document.querySelectorAll<HTMLButtonElement>('.sl-choice')].find(b => b.textContent?.trim() === 'Both')?.click();
+		document.querySelector<HTMLInputElement>('.sl-row .sl-check')?.click();
+	}
+	if (params.get('show') === 'wizard') {
+		document.body.classList.add('preview-wizard');
+		openWizard();
+		if (params.get('step') === 'project') {
+			await delay(50);
+			[...document.querySelectorAll<HTMLButtonElement>('#modal button')].find(b => b.textContent?.trim() === 'Next')?.click();
+			await delay(50);
+			const token = document.querySelector<HTMLInputElement>('#modal input[type="password"]');
+			if (token) {
+				token.value = 'preview';
+				token.dispatchEvent(new Event('input', { bubbles: true }));
+			}
+			[...document.querySelectorAll<HTMLButtonElement>('#modal button')].find(b => b.textContent?.trim() === 'Connect')?.click();
+			await delay(1200);
+			document.querySelector<HTMLButtonElement>('#modal .sl-result')?.click();
+		}
+	}
+});

@@ -1,16 +1,20 @@
 /* SyncLab: neo-brutalist panels that follow Obsidian's light/dark mode. */
 
 .synclab {
+	/* Surfaces */
 	--sl-bg: #fbf3e1;
-	--sl-dot: #e2d4b4;
+	--sl-dot: #e9dec4;
 	--sl-card: #fffdf7;
 	--sl-field: #ffffff;
+	/* Outlines of neutral surfaces, outlines of coloured fills, and hard shadows */
 	--sl-ink: #111111;
+	--sl-fill-ink: #111111;
+	--sl-shade: #111111;
+	/* Text */
 	--sl-text: #111111;
-	--sl-muted: #5f574a;
+	--sl-muted: #574f43;
 	--sl-on-fill: #111111;
-	--sl-log: #141414;
-	--sl-log-text: #a39d8d;
+	/* Coloured fills */
 	--sl-yellow: #ffd23f;
 	--sl-pink: #ff92c6;
 	--sl-green: #7fe18b;
@@ -18,13 +22,35 @@
 	--sl-violet: #c6abff;
 	--sl-orange: #ffb35c;
 	--sl-red: #ff7d7d;
+	/* Small white pills that sit on coloured fills, in both themes */
+	--sl-chip-bg: #fffdf7;
+	--sl-chip-text: #111111;
+	/* States */
+	--sl-check-on: #111111;
+	--sl-check-mark: #fffdf7;
+	--sl-selected-bg: #111111;
+	--sl-selected-text: #fffdf7;
+	--sl-focus: #1f6fd1;
+	/* Activity log: a dark terminal box in both themes */
+	--sl-log: #161513;
+	--sl-log-text: #c2bcae;
+	--sl-log-time: #8f8979;
+	--sl-log-ok: #7fe18b;
+	--sl-log-up: #8ccaff;
+	--sl-log-down: #c6abff;
+	--sl-log-warn: #ffd23f;
+	--sl-log-error: #ff8a8a;
+	/* Diff */
+	--sl-diff-add: rgba(127, 225, 139, 0.35);
+	--sl-diff-del: rgba(255, 125, 125, 0.35);
+	/* Shape */
 	--sl-bw: 3px;
 	--sl-bw-sm: 2.5px;
 	--sl-radius: 16px;
 	--sl-radius-md: 11px;
 	--sl-radius-sm: 8px;
-	--sl-shadow: 6px 6px 0 var(--sl-ink);
-	--sl-shadow-sm: 3px 3px 0 var(--sl-ink);
+	--sl-shadow: 6px 6px 0 var(--sl-shade);
+	--sl-shadow-sm: 3px 3px 0 var(--sl-shade);
 	--sl-font: "SyncLab Lexend", var(--font-interface);
 	--sl-mono: var(--font-monospace);
 
@@ -34,16 +60,37 @@
 	line-height: 1.45;
 }
 
+/*
+ * Dark: warm charcoal surfaces, mid-grey outlines (clearly visible, never
+ * glaring), black hard shadows, slightly toned-down fills, and coloured
+ * fills outlined in near-black so they read as crisp stickers.
+ */
 .theme-dark .synclab {
-	--sl-bg: #19181c;
-	--sl-dot: #2f2d34;
-	--sl-card: #232227;
-	--sl-field: #1c1b20;
-	--sl-ink: #f3e9d2;
-	--sl-text: #f6f0e1;
-	--sl-muted: #b3aa98;
-	--sl-log: #0e0d10;
-	--sl-log-text: #9a9384;
+	--sl-bg: #1f1d1b;
+	--sl-dot: #34312d;
+	--sl-card: #2a2724;
+	--sl-field: #23211f;
+	--sl-ink: #9c9384;
+	--sl-fill-ink: #141210;
+	--sl-shade: #000000;
+	--sl-text: #f4efe6;
+	--sl-muted: #bdb4a5;
+	--sl-on-fill: #141210;
+	--sl-yellow: #f2c53d;
+	--sl-pink: #ee8cbc;
+	--sl-green: #74d483;
+	--sl-blue: #7ebcf0;
+	--sl-violet: #b8a0f4;
+	--sl-orange: #f0a656;
+	--sl-red: #ee7474;
+	--sl-check-on: #f2c53d;
+	--sl-check-mark: #141210;
+	--sl-selected-bg: #f2c53d;
+	--sl-selected-text: #141210;
+	--sl-focus: #8ccaff;
+	--sl-log: #141312;
+	--sl-diff-add: rgba(116, 212, 131, 0.24);
+	--sl-diff-del: rgba(238, 116, 116, 0.24);
 }
 
 .synclab *,
@@ -116,8 +163,8 @@
 	padding: 2px 11px 4px;
 	background: var(--sl-yellow);
 	color: var(--sl-on-fill);
-	border: var(--sl-bw) solid var(--sl-ink);
-	box-shadow: 5px 5px 0 var(--sl-ink);
+	border: var(--sl-bw) solid var(--sl-fill-ink);
+	box-shadow: 5px 5px 0 var(--sl-shade);
 	transform: rotate(-2.5deg);
 }
 
@@ -142,9 +189,9 @@
 }
 
 .synclab .sl-pill .sl-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex: none; }
-.synclab .sl-pill.is-ok { background: var(--sl-green); color: var(--sl-on-fill); box-shadow: var(--sl-shadow-sm); transform: rotate(-2deg); }
-.synclab .sl-pill.is-bad { background: var(--sl-red); color: var(--sl-on-fill); box-shadow: var(--sl-shadow-sm); transform: rotate(-2deg); }
-.synclab .sl-pill.is-busy { background: var(--sl-yellow); color: var(--sl-on-fill); box-shadow: var(--sl-shadow-sm); transform: rotate(-2deg); }
+.synclab .sl-pill.is-ok { background: var(--sl-green); color: var(--sl-on-fill); border-color: var(--sl-fill-ink); box-shadow: var(--sl-shadow-sm); transform: rotate(-2deg); }
+.synclab .sl-pill.is-bad { background: var(--sl-red); color: var(--sl-on-fill); border-color: var(--sl-fill-ink); box-shadow: var(--sl-shadow-sm); transform: rotate(-2deg); }
+.synclab .sl-pill.is-busy { background: var(--sl-yellow); color: var(--sl-on-fill); border-color: var(--sl-fill-ink); box-shadow: var(--sl-shadow-sm); transform: rotate(-2deg); }
 .synclab .sl-pill.is-mono { font-family: var(--sl-mono); letter-spacing: 0; text-transform: none; font-size: 12px; }
 .synclab .sl-pill svg { width: 14px; height: 14px; }
 
@@ -162,14 +209,14 @@
 	align-items: flex-start;
 	gap: 10px;
 	padding: 12px 14px 11px;
-	border-bottom: var(--sl-bw) solid var(--sl-ink);
+	border-bottom: var(--sl-bw) solid var(--sl-fill-ink);
 	color: var(--sl-on-fill);
 }
 
 .synclab .sl-card-head .sl-titles { flex: 1; min-width: 0; }
 .synclab .sl-card-head h2 { margin: 0; font-size: 18px; font-weight: 900; letter-spacing: -0.01em; line-height: 1.15; color: var(--sl-on-fill); }
 .synclab .sl-card-head p { margin: 3px 0 0; font-size: 12.5px; font-weight: 700; color: var(--sl-on-fill); }
-.synclab .sl-card-head .sl-pill { background: #fffdf7; color: #111111; border-color: #111111; font-size: 10.5px; padding: 3px 9px; }
+.synclab .sl-card-head .sl-pill { background: var(--sl-chip-bg); color: var(--sl-chip-text); border-color: var(--sl-chip-text); font-size: 10.5px; padding: 3px 9px; }
 .synclab .sl-head-yellow { background: var(--sl-yellow); }
 .synclab .sl-head-pink { background: var(--sl-pink); }
 .synclab .sl-head-blue { background: var(--sl-blue); }
@@ -214,7 +261,7 @@
 .synclab .sl-field:focus-visible { box-shadow: var(--sl-shadow-sm); border-color: var(--sl-ink); }
 .synclab .sl-field::placeholder { color: var(--sl-muted); }
 .synclab .sl-hint { margin: -4px 0 0; font-size: 12px; color: var(--sl-muted); line-height: 1.5; }
-.synclab .sl-error-text { font-size: 12.5px; font-weight: 700; color: var(--sl-text); background: var(--sl-red); border: var(--sl-bw-sm) solid var(--sl-ink); border-radius: var(--sl-radius-sm); padding: 6px 10px; }
+.synclab .sl-error-text { font-size: 12.5px; font-weight: 700; color: var(--sl-on-fill); background: var(--sl-red); border: var(--sl-bw-sm) solid var(--sl-fill-ink); border-radius: var(--sl-radius-sm); padding: 6px 10px; }
 
 /* Buttons */
 .synclab button.sl-btn,
@@ -239,11 +286,11 @@
 	transition: transform 0.07s ease, box-shadow 0.07s ease;
 }
 .synclab button.sl-btn:hover { background: var(--sl-card); }
-.synclab button.sl-btn:active:not(:disabled) { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--sl-ink); }
+.synclab button.sl-btn:active:not(:disabled) { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--sl-shade); }
 .synclab button.sl-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.synclab button.sl-btn.is-primary { background: var(--sl-green); color: var(--sl-on-fill); }
-.synclab button.sl-btn.is-yellow { background: var(--sl-yellow); color: var(--sl-on-fill); }
-.synclab button.sl-btn.is-danger { background: var(--sl-red); color: var(--sl-on-fill); }
+.synclab button.sl-btn.is-primary { background: var(--sl-green); color: var(--sl-on-fill); border-color: var(--sl-fill-ink); }
+.synclab button.sl-btn.is-yellow { background: var(--sl-yellow); color: var(--sl-on-fill); border-color: var(--sl-fill-ink); }
+.synclab button.sl-btn.is-danger { background: var(--sl-red); color: var(--sl-on-fill); border-color: var(--sl-fill-ink); }
 .synclab button.sl-btn.is-block { width: 100%; }
 
 .synclab button.sl-mini {
@@ -260,7 +307,9 @@
 	text-transform: uppercase;
 	cursor: pointer;
 }
-.synclab button.sl-mini:hover { box-shadow: 2px 2px 0 var(--sl-ink); background: var(--sl-card); }
+.synclab button.sl-mini:hover { box-shadow: 2px 2px 0 var(--sl-shade); background: var(--sl-card); }
+.synclab .sl-card-head button.sl-mini,
+.synclab .sl-card-head button.sl-mini:hover { background: var(--sl-chip-bg); color: var(--sl-chip-text); border-color: var(--sl-chip-text); }
 
 .synclab button.sl-icon-btn {
 	width: 32px;
@@ -291,9 +340,9 @@
 	gap: 12px;
 	background: var(--sl-green);
 	color: var(--sl-on-fill);
-	border: var(--sl-bw) solid var(--sl-ink);
+	border: var(--sl-bw) solid var(--sl-fill-ink);
 	border-radius: 13px;
-	box-shadow: 5px 5px 0 var(--sl-ink);
+	box-shadow: 5px 5px 0 var(--sl-shade);
 	font: 900 20px var(--sl-font);
 	letter-spacing: 0.05em;
 	text-transform: uppercase;
@@ -301,7 +350,7 @@
 	transition: transform 0.07s ease, box-shadow 0.07s ease;
 }
 .synclab button.sl-sync:hover { background: var(--sl-green); }
-.synclab button.sl-sync:active:not(.is-busy) { transform: translate(5px, 5px); box-shadow: 0 0 0 var(--sl-ink); }
+.synclab button.sl-sync:active:not(.is-busy) { transform: translate(5px, 5px); box-shadow: 0 0 0 var(--sl-shade); }
 .synclab button.sl-sync .sl-sync-icon { display: grid; place-items: center; flex: none; }
 .synclab button.sl-sync .sl-sync-icon svg { width: 22px; height: 22px; stroke-width: 3; }
 .synclab button.sl-sync .sl-sync-label { flex: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -311,9 +360,9 @@
 	letter-spacing: 0;
 	padding: 2px 8px;
 	border-radius: 999px;
-	background: #fffdf7;
-	color: #111111;
-	border: 2px solid #111111;
+	background: var(--sl-chip-bg);
+	color: var(--sl-chip-text);
+	border: 2px solid var(--sl-chip-text);
 }
 .synclab button.sl-sync .sl-progress { position: absolute; inset: 0 auto 0 0; background: rgba(17, 17, 17, 0.12); transition: width 0.3s ease; }
 .synclab button.sl-sync .sl-sync-icon,
@@ -327,7 +376,7 @@
 }
 .synclab button.sl-sync.is-busy .sl-sync-icon { animation: synclab-spin 1s linear infinite; }
 .synclab button.sl-sync.is-done { background: var(--sl-yellow); }
-.synclab button.sl-sync.is-quiet { background: var(--sl-card); color: var(--sl-text); font-size: 17px; box-shadow: var(--sl-shadow-sm); }
+.synclab button.sl-sync.is-quiet { background: var(--sl-card); color: var(--sl-text); border-color: var(--sl-ink); font-size: 17px; box-shadow: var(--sl-shadow-sm); }
 @keyframes synclab-stripes { to { background-position: 34px 0; } }
 @keyframes synclab-spin { to { transform: rotate(360deg); } }
 
@@ -369,7 +418,7 @@
 	display: grid;
 	place-items: center;
 	border-radius: var(--sl-radius-sm);
-	border: var(--sl-bw-sm) solid var(--sl-ink);
+	border: var(--sl-bw-sm) solid var(--sl-fill-ink);
 	color: var(--sl-on-fill);
 	font: 800 12.5px var(--sl-mono);
 	flex: none;
@@ -396,7 +445,7 @@
 }
 .synclab input.sl-check:hover { background: var(--sl-field); }
 .synclab input.sl-check:checked,
-.synclab input.sl-check:checked:hover { background: var(--sl-ink); border-color: var(--sl-ink); }
+.synclab input.sl-check:checked:hover { background: var(--sl-check-on); border-color: var(--sl-fill-ink); }
 /* Obsidian draws its own tick on checkbox ::after with a mask; every property is set here so it can't leak through. */
 .synclab input.sl-check::after { content: none; }
 .synclab input.sl-check:checked::after {
@@ -411,12 +460,12 @@
 	margin: 0;
 	border: 0;
 	transform: none;
-	background-color: var(--sl-card);
+	background-color: var(--sl-check-mark);
 	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 74% no-repeat;
 	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 74% no-repeat;
 }
 .synclab input.sl-check:focus-visible,
-.synclab button:focus-visible { outline: 3px solid var(--sl-blue); outline-offset: 2px; }
+.synclab button:focus-visible { outline: 3px solid var(--sl-focus); outline-offset: 2px; }
 
 /* Conflicts */
 .synclab .sl-conflict { display: grid; gap: 10px; }
@@ -437,8 +486,9 @@
 	cursor: pointer;
 	transition: transform 0.07s ease, box-shadow 0.07s ease;
 }
-.synclab button.sl-choice:hover { transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--sl-ink); background: var(--sl-field); }
-.synclab button.sl-choice[aria-pressed="true"] { background: var(--sl-ink); color: var(--sl-card); }
+.synclab button.sl-choice:hover { transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--sl-shade); background: var(--sl-field); }
+.synclab button.sl-choice[aria-pressed="true"],
+.synclab button.sl-choice[aria-pressed="true"]:hover { background: var(--sl-selected-bg); color: var(--sl-selected-text); border-color: var(--sl-fill-ink); }
 
 /* Notices */
 .synclab .sl-notice {
@@ -453,8 +503,8 @@
 	font-size: 12.5px;
 	font-weight: 600;
 }
-.synclab .sl-notice.is-info { background: var(--sl-blue); color: var(--sl-on-fill); }
-.synclab .sl-notice.is-error { background: var(--sl-red); color: var(--sl-on-fill); }
+.synclab .sl-notice.is-info { background: var(--sl-blue); color: var(--sl-on-fill); border-color: var(--sl-fill-ink); }
+.synclab .sl-notice.is-error { background: var(--sl-red); color: var(--sl-on-fill); border-color: var(--sl-fill-ink); }
 .synclab .sl-notice .sl-notice-body { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .synclab .sl-notice b { font-weight: 900; }
 
@@ -474,12 +524,12 @@
 	user-select: text;
 }
 .synclab .sl-log .sl-empty { font-style: italic; }
-.synclab .sl-log .sl-time { color: #6f6a5e; margin-right: 8px; }
-.synclab .sl-log .k-ok { color: #7fe18b; }
-.synclab .sl-log .k-up { color: #8ccaff; }
-.synclab .sl-log .k-down { color: #c6abff; }
-.synclab .sl-log .k-warn { color: #ffd23f; }
-.synclab .sl-log .k-error { color: #ff7d7d; }
+.synclab .sl-log .sl-time { color: var(--sl-log-time); margin-right: 8px; }
+.synclab .sl-log .k-ok { color: var(--sl-log-ok); }
+.synclab .sl-log .k-up { color: var(--sl-log-up); }
+.synclab .sl-log .k-down { color: var(--sl-log-down); }
+.synclab .sl-log .k-warn { color: var(--sl-log-warn); }
+.synclab .sl-log .k-error { color: var(--sl-log-error); }
 
 .synclab .sl-foot { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 600; color: var(--sl-muted); padding: 0 2px; }
 
@@ -491,7 +541,7 @@
 	padding: 0;
 	border: var(--sl-bw) solid var(--sl-ink);
 	border-radius: 18px;
-	box-shadow: 8px 8px 0 var(--sl-ink);
+	box-shadow: 8px 8px 0 var(--sl-shade);
 	background-color: var(--sl-bg);
 	background-image: radial-gradient(var(--sl-dot) 1.3px, transparent 1.5px);
 	background-size: 20px 20px;
@@ -528,7 +578,7 @@
 	cursor: pointer;
 }
 .synclab button.sl-result:hover { box-shadow: var(--sl-shadow-sm); transform: translate(-1px, -1px); background: var(--sl-field); }
-.synclab button.sl-result[aria-pressed="true"] { background: var(--sl-yellow); color: var(--sl-on-fill); box-shadow: var(--sl-shadow-sm); }
+.synclab button.sl-result[aria-pressed="true"] { background: var(--sl-yellow); color: var(--sl-on-fill); border-color: var(--sl-fill-ink); box-shadow: var(--sl-shadow-sm); }
 .synclab button.sl-result b { display: block; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .synclab button.sl-result small { display: block; font-size: 11.5px; color: inherit; opacity: 0.75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .synclab .sl-user { display: flex; align-items: center; gap: 10px; }
@@ -549,8 +599,8 @@
 }
 .synclab .sl-diff-line { display: grid; grid-template-columns: 28px minmax(0, 1fr); white-space: pre-wrap; overflow-wrap: anywhere; }
 .synclab .sl-diff-line .sl-sign { text-align: center; color: var(--sl-muted); user-select: none; }
-.synclab .sl-diff-line.is-add { background: rgba(127, 225, 139, 0.35); }
-.synclab .sl-diff-line.is-del { background: rgba(255, 125, 125, 0.35); }
+.synclab .sl-diff-line.is-add { background: var(--sl-diff-add); }
+.synclab .sl-diff-line.is-del { background: var(--sl-diff-del); }
 .synclab .sl-diff-gap { padding: 2px 10px; color: var(--sl-muted); font-style: italic; background: var(--sl-card); border-block: 2px dashed var(--sl-ink); }
 .synclab .sl-diff-legend { display: flex; gap: 10px; flex-wrap: wrap; }
 
