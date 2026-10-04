@@ -18,12 +18,18 @@ export function toVaultPath(repoPath: RepoPath, folder: string): string {
 	return folder ? `${folder}/${repoPath}` : repoPath;
 }
 
+/** Syncthing's conflict copies (`note.sync-conflict-20260404-201849-OASEYZQ.md`) and Windows temp files (`~syncthing~note.md.tmp`). */
+const SYNCTHING_FILE = /\.sync-conflict-\d{8}-\d{6}-[A-Z0-9]{7}(\.|$)|^~syncthing~.*\.tmp$/;
+
 /**
  * Paths SyncLab never syncs, whatever the settings say: anything inside a
- * dot-folder or named with a leading dot (.obsidian, .trash, .git, .gitignore …).
+ * dot-folder or named with a leading dot (.obsidian, .trash, .git, .gitignore …),
+ * and files another sync tool (Syncthing) creates for its own bookkeeping.
  */
 export function isHardExcluded(repoPath: RepoPath): boolean {
-	return repoPath.split('/').some(part => part.startsWith('.'));
+	const parts = repoPath.split('/');
+	if (parts.some(part => part.startsWith('.'))) return true;
+	return SYNCTHING_FILE.test(parts[parts.length - 1] ?? '');
 }
 
 /** Builds a matcher for .gitignore-style patterns (one per line, # comments allowed). */

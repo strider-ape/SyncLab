@@ -11,7 +11,8 @@
 		"test": "vitest run",
 		"preview": "node scripts/preview.mjs",
 		"test:contract": "vitest run --config vitest.contract.config.ts",
-		"version": "node version-bump.mjs && git add manifest.json versions.json"
+		"version": "node version-bump.mjs && git add manifest.json versions.json",
+		"install-plugin": "node scripts/install-plugin.mjs"
 	},
 	"keywords": [
 		"obsidian",

@@ -383,26 +383,37 @@
 .synclab input.sl-check {
 	appearance: none;
 	-webkit-appearance: none;
+	position: relative;
 	width: 21px;
 	height: 21px;
 	margin: 0;
+	padding: 0;
 	flex: none;
 	cursor: pointer;
-	display: grid;
-	place-items: center;
 	border: var(--sl-bw-sm) solid var(--sl-ink);
 	border-radius: 7px;
 	background: var(--sl-field);
 }
-.synclab input.sl-check:checked { background: var(--sl-ink); }
+.synclab input.sl-check:hover { background: var(--sl-field); }
+.synclab input.sl-check:checked,
+.synclab input.sl-check:checked:hover { background: var(--sl-ink); border-color: var(--sl-ink); }
+/* Obsidian draws its own tick on checkbox ::after with a mask; every property is set here so it can't leak through. */
+.synclab input.sl-check::after { content: none; }
 .synclab input.sl-check:checked::after {
 	content: "";
-	width: 5px;
-	height: 10px;
-	margin-top: -2px;
-	border: solid var(--sl-card);
-	border-width: 0 3px 3px 0;
-	transform: rotate(45deg);
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	inset-inline-start: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	border: 0;
+	transform: none;
+	background-color: var(--sl-card);
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 74% no-repeat;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 74% no-repeat;
 }
 .synclab input.sl-check:focus-visible,
 .synclab button:focus-visible { outline: 3px solid var(--sl-blue); outline-offset: 2px; }
