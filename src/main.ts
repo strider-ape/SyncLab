@@ -9,19 +9,19 @@ import { GitLabRepo } from './gitlab/GitLabRepo';
 import { obsidianHttp } from './gitlab/obsidianHttp';
 import { ObsidianLocalFs } from './obsidian/ObsidianLocalFs';
 import { PluginStateSlots } from './obsidian/PluginStateSlots';
-import { DEFAULT_SETTINGS, isConfigured, targetKey, type SyncLabSettings } from './settings';
+import { DEFAULT_SETTINGS, DEFAULT_TOKEN_SECRET, isConfigured, targetKey, type SyncLabSettings } from './settings';
 import type { HostInfo, SidebarHost } from './ui/host';
-import { ConfirmModal, DiffModal, SetupModal } from './ui/modals';
+import { ConfirmModal, DiffModal, SetupModal, TokenModal } from './ui/modals';
 import { SyncLabSettingTab } from './ui/SettingsTab';
 import { SyncLabView, VIEW_TYPE } from './ui/SyncLabView';
-import type { WizardResult } from './ui/wizard';
+import { tokenPageUrl, type WizardResult } from './ui/wizard';
 
 const DEVICE_ID_KEY = 'synclab-device-id';
 
 export default class SyncLabPlugin extends Plugin {
 	settings: SyncLabSettings = { ...DEFAULT_SETTINGS };
 	readonly engine = new SyncEngine();
-	readonly info = new Store<HostInfo>({ configured: false, missingToken: false, projectPath: '', branch: '', deviceName: '' });
+	readonly info = new Store<HostInfo>({ configured: false, missingToken: false, projectPath: '', branch: '', deviceName: '', version: '' });
 
 	private deviceId = '';
 	private reconfigureAfterSync = false;
@@ -84,7 +84,7 @@ export default class SyncLabPlugin extends Plugin {
 			return;
 		}
 		const settings = { ...this.settings };
-		const token = settings.tokenSecret ? this.app.secretStorage.getSecret(settings.tokenSecret) : null;
+		const token = this.storedToken();
 		const ready = isConfigured(settings) && Boolean(token);
 		this.info.set({
 			configured: ready,
@@ -92,6 +92,7 @@ export default class SyncLabPlugin extends Plugin {
 			projectPath: settings.projectPath,
 			branch: settings.branch,
 			deviceName: this.deviceName(),
+			version: this.manifest.version,
 		});
 
 		if (!ready || !token || settings.projectId === null) {
@@ -139,7 +140,7 @@ export default class SyncLabPlugin extends Plugin {
 	}
 
 	openSetup(): void {
-		const existing = this.settings.tokenSecret ? this.app.secretStorage.getSecret(this.settings.tokenSecret) : null;
+		const existing = this.storedToken();
 		new SetupModal(this.app, {
 			initialUrl: this.settings.gitlabUrl,
 			initialFolder: this.settings.folder,
@@ -149,6 +150,31 @@ export default class SyncLabPlugin extends Plugin {
 			client: (url, token) => new GitLabClient({ baseUrl: url, token, http: obsidianHttp }),
 			openUrl: url => window.open(url),
 			finish: result => this.finishSetup(result),
+		}).open();
+	}
+
+	/** Whether this device's keychain holds a GitLab token for SyncLab. */
+	hasToken(): boolean {
+		return Boolean(this.storedToken());
+	}
+
+	/** Lets the user paste a new token; it's checked with GitLab before it's saved. */
+	openTokenModal(onSaved?: () => void): void {
+		const baseUrl = normalizeBaseUrl(this.settings.gitlabUrl);
+		new TokenModal(this.app, {
+			hasToken: this.hasToken(),
+			tokenPageUrl: tokenPageUrl(baseUrl),
+			openUrl: url => window.open(url),
+			check: async token => (await new GitLabClient({ baseUrl, token, http: obsidianHttp }).currentUser()).username,
+			save: async token => {
+				this.app.secretStorage.setSecret(this.tokenSecretName(), token);
+				if (this.settings.tokenSecret !== this.tokenSecretName()) {
+					this.settings.tokenSecret = this.tokenSecretName();
+					await this.saveData(this.settings);
+				}
+				this.reconfigure();
+				onSaved?.();
+			},
 		}).open();
 	}
 
@@ -164,11 +190,11 @@ export default class SyncLabPlugin extends Plugin {
 	}
 
 	private async finishSetup(result: WizardResult): Promise<void> {
-		this.app.secretStorage.setSecret(this.settings.tokenSecret || DEFAULT_SETTINGS.tokenSecret, result.token);
+		this.app.secretStorage.setSecret(this.tokenSecretName(), result.token);
 		this.settings = {
 			...this.settings,
 			gitlabUrl: normalizeBaseUrl(result.gitlabUrl),
-			tokenSecret: this.settings.tokenSecret || DEFAULT_SETTINGS.tokenSecret,
+			tokenSecret: this.tokenSecretName(),
 			projectId: result.project.id,
 			projectPath: result.project.path_with_namespace,
 			projectWebUrl: result.project.web_url,
@@ -190,6 +216,7 @@ export default class SyncLabPlugin extends Plugin {
 			openDiff: change => void this.openDiff(change),
 			openFile: path => void this.openFile(path),
 			openSetup: () => this.openSetup(),
+			replaceToken: () => this.openTokenModal(),
 			openSettings: () => this.openSettingsTab(),
 			openOnGitLab: () => {
 				if (this.settings.projectWebUrl) window.open(`${this.settings.projectWebUrl}/-/tree/${encodeURIComponent(this.settings.branch)}`);
@@ -242,6 +269,15 @@ export default class SyncLabPlugin extends Plugin {
 		const id = crypto.randomUUID();
 		this.app.saveLocalStorage(DEVICE_ID_KEY, id);
 		return id;
+	}
+
+	/** The keychain entry SyncLab uses. Falls back to the default if the setting isn't a valid name. */
+	private tokenSecretName(): string {
+		return /^[a-z0-9-]+$/.test(this.settings.tokenSecret) ? this.settings.tokenSecret : DEFAULT_TOKEN_SECRET;
+	}
+
+	private storedToken(): string | null {
+		return this.app.secretStorage.getSecret(this.tokenSecretName());
 	}
 
 	private pluginDir(): string {

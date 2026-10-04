@@ -5,6 +5,7 @@ import Sidebar from '../../src/ui/components/Sidebar.svelte';
 import Wizard from '../../src/ui/components/Wizard.svelte';
 import DiffView from '../../src/ui/components/DiffView.svelte';
 import { Store } from '../../src/engine/store';
+import { TokenModal } from '../../src/ui/modals';
 import { GitLabError, type GitLabClient, type GitLabProject } from '../../src/gitlab/GitLabClient';
 import type { HostInfo, SidebarHost } from '../../src/ui/host';
 import { FakeGitLab, makeDevice, type Device } from '../../tests/support/fakes';
@@ -53,7 +54,7 @@ const modalLayer = document.getElementById('modal-layer') as HTMLElement;
 const modalTarget = document.getElementById('modal') as HTMLElement;
 let sidebar: ReturnType<typeof mount> | null = null;
 let modal: ReturnType<typeof mount> | null = null;
-const info = new Store<HostInfo>({ configured: true, missingToken: false, projectPath: 'dip/notes-vault', branch: 'main', deviceName: 'Laptop' });
+const info = new Store<HostInfo>({ configured: true, missingToken: false, projectPath: 'dip/notes-vault', branch: 'main', deviceName: 'Laptop', version: '0.1.2' });
 
 function closeModal() {
 	if (modal) void unmount(modal);
@@ -137,9 +138,24 @@ async function start() {
 		},
 		openFile: () => undefined,
 		openSetup: openWizard,
+		replaceToken: () => undefined,
 		openSettings: () => undefined,
 		openOnGitLab: () => undefined,
 	};
+	if (new URLSearchParams(location.search).has('showcase')) {
+		// The same sidebar twice, light and dark side by side (used for README images).
+		const row = document.createElement('div');
+		row.className = 'showcase';
+		for (const theme of ['theme-light', 'theme-dark']) {
+			const pane = row.appendChild(document.createElement('div'));
+			pane.className = `showcase-pane ${theme}`;
+			const target = pane.appendChild(document.createElement('div'));
+			target.className = 'synclab synclab-host';
+			mount(Sidebar, { target, props: { host } });
+		}
+		document.body.appendChild(row);
+		return;
+	}
 	sidebar = mount(Sidebar, { target: sidebarTarget, props: { host } });
 }
 
@@ -173,8 +189,20 @@ void start().then(async () => {
 	await delay(50);
 	if (params.get('demo') === 'states') {
 		// One screenshot shows a selected choice, a ticked row and an unticked row.
-		[...document.querySelectorAll<HTMLButtonElement>('.sl-choice')].find(b => b.textContent?.trim() === 'Both')?.click();
-		document.querySelector<HTMLInputElement>('.sl-row .sl-check')?.click();
+		for (const root of document.querySelectorAll('.synclab-host')) {
+			[...root.querySelectorAll<HTMLButtonElement>('.sl-choice')].find(b => b.textContent?.trim() === 'Both')?.click();
+			root.querySelector<HTMLInputElement>('.sl-row .sl-check')?.click();
+		}
+	}
+	if (params.get('show') === 'token') {
+		document.body.classList.add('preview-wizard');
+		new TokenModal({} as never, {
+			hasToken: true,
+			tokenPageUrl: 'https://gitlab.com/-/user_settings/personal_access_tokens',
+			openUrl: url => void window.open(url),
+			check: async token => { await delay(400); if (token.length < 12) throw new GitLabError('unauthorized', 'rejected', 401); return 'dip'; },
+			save: async () => undefined,
+		}).open();
 	}
 	if (params.get('show') === 'wizard') {
 		document.body.classList.add('preview-wizard');

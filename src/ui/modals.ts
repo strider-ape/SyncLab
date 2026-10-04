@@ -1,10 +1,10 @@
-import { Modal, type App } from 'obsidian';
+import { Modal, Notice, setIcon, type App } from 'obsidian';
 import { mount, unmount } from 'svelte';
 import type { Change } from '../core/types';
 import type { SyncEngine } from '../engine/SyncEngine';
 import DiffView from './components/DiffView.svelte';
 import Wizard from './components/Wizard.svelte';
-import type { WizardHost } from './wizard';
+import { explain, type WizardHost } from './wizard';
 
 type Mounted = ReturnType<typeof mount>;
 
@@ -56,6 +56,88 @@ export class DiffModal extends SvelteModal {
 			target,
 			props: { path: this.change.path, remote: this.content.remote, local: this.content.local, onClose: () => this.close() },
 		});
+	}
+}
+
+export interface TokenModalOptions {
+	hasToken: boolean;
+	tokenPageUrl: string;
+	openUrl(url: string): void;
+	/** Checks the token with GitLab and returns the account's username. */
+	check(token: string): Promise<string>;
+	save(token: string): Promise<void>;
+}
+
+/**
+ * Adds or replaces the GitLab token. One big password field, checked with
+ * GitLab before anything is saved, so a typo or a token without API access
+ * never replaces a working one.
+ */
+export class TokenModal extends Modal {
+	constructor(app: App, private readonly options: TokenModalOptions) {
+		super(app);
+		this.modalEl.addClasses(['synclab', 'synclab-modal']);
+	}
+
+	onOpen(): void {
+		const { options } = this;
+		const root = this.contentEl.createDiv({ cls: 'sl-wizard' });
+		const card = root.createEl('section', { cls: 'sl-card' });
+		const head = card.createDiv({ cls: 'sl-card-head sl-head-pink' });
+		const titles = head.createDiv({ cls: 'sl-titles' });
+		titles.createEl('h2', { text: options.hasToken ? 'Replace your GitLab token' : 'Add your GitLab token' });
+		titles.createEl('p', { text: 'Kept in this device’s keychain, never in your vault' });
+
+		const body = card.createDiv({ cls: 'sl-card-body' });
+		body.createEl('p', { text: 'Create a token with API access, then paste it below. SyncLab checks it with GitLab before saving it.' });
+		const create = body.createEl('button', { cls: 'sl-btn is-yellow', attr: { type: 'button' } });
+		create.createSpan({ text: 'Create a token on GitLab' });
+		setIcon(create.createSpan({ cls: 'sl-btn-icon' }), 'external-link');
+		create.addEventListener('click', () => options.openUrl(options.tokenPageUrl));
+		body.createEl('label', { cls: 'sl-label', text: 'New token', attr: { for: 'synclab-new-token' } });
+		const input = body.createEl('input', {
+			cls: 'sl-field',
+			attr: { id: 'synclab-new-token', type: 'password', autocomplete: 'off', spellcheck: 'false', placeholder: 'Paste the new token here' },
+		});
+		const error = body.createEl('p', { cls: 'sl-error-text' });
+		error.hide();
+
+		const actions = root.createDiv({ cls: 'sl-wizard-actions' });
+		const cancel = actions.createEl('button', { cls: 'sl-btn', text: 'Cancel', attr: { type: 'button' } });
+		const save = actions.createEl('button', { cls: 'sl-btn is-primary', text: 'Check and save', attr: { type: 'button' } });
+		cancel.addEventListener('click', () => this.close());
+
+		const submit = async () => {
+			const token = input.value.trim();
+			error.hide();
+			if (!token) {
+				error.setText('Paste your token first.');
+				error.show();
+				return;
+			}
+			save.disabled = true;
+			save.setText('Checking…');
+			try {
+				const username = await options.check(token);
+				await options.save(token);
+				new Notice(`SyncLab: token saved. Connected as @${username}.`);
+				this.close();
+			} catch (e) {
+				error.setText(explain(e, 'token'));
+				error.show();
+				save.disabled = false;
+				save.setText('Check and save');
+			}
+		};
+		save.addEventListener('click', () => void submit());
+		input.addEventListener('keydown', event => {
+			if (event.key === 'Enter') void submit();
+		});
+		window.setTimeout(() => input.focus(), 0);
+	}
+
+	onClose(): void {
+		this.contentEl.empty();
 	}
 }
 

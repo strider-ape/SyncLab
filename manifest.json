@@ -4,6 +4,7 @@
 	"version": "0.1.1",
 	"minAppVersion": "1.11.4",
 	"description": "Review your changes and sync your vault with a GitLab repository in one press.",
-	"author": "SyncLab contributors",
+	"author": "Dip",
+	"authorUrl": "https://github.com/strider-ape",
 	"isDesktopOnly": false
 }

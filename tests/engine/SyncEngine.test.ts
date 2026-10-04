@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Resolution } from '../../src/core/types';
+import { GitLabError } from '../../src/gitlab/GitLabClient';
 import { FakeGitLab, FakeVault, MemorySlots, makeDevice, type Device } from '../support/fakes';
 
 const map = (entries: Record<string, string>) => new Map(Object.entries(entries));
@@ -369,6 +370,25 @@ describe('races and safety', () => {
 		expect(summary.deleted).toBe(0);
 		expect(otherProject.files().get('README.md')).toBe('new project');
 		expect(d.vault.get('README.md')).toBe('new project');
+	});
+});
+
+describe('errors the sidebar can act on', () => {
+	it('reports a rejected token as unauthorized, and clears it once GitLab answers again', async () => {
+		const remote = new FakeGitLab();
+		const d = makeDevice(remote);
+		const head = remote.head.bind(remote);
+		remote.head = async () => { throw new GitLabError('unauthorized', 'GitLab rejected the token. It may be wrong, expired or revoked.', 401); };
+		await d.engine.refresh();
+		expect(d.engine.state.get()).toMatchObject({ errorKind: 'unauthorized' });
+		const failed = await d.engine.sync();
+		expect(failed.error).toContain('rejected the token');
+		expect(d.engine.state.get().errorKind).toBe('unauthorized');
+
+		remote.head = head;
+		await d.engine.refresh();
+		expect(d.engine.state.get().error).toBeUndefined();
+		expect(d.engine.state.get().errorKind).toBeUndefined();
 	});
 });
 

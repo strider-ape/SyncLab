@@ -3,21 +3,39 @@
 > A GitLab sync plugin for Obsidian that does one job and does it perfectly:
 > **review what changed, press Sync, and your vault and your GitLab repo match.**
 
-Status: v0.1 built, not yet run inside Obsidian · Last fact-checked: 2026-10-04
+Status: v0.1.2 released, tested on desktop and mobile · Last fact-checked: 2026-10-04
 
 ## 0. Where things stand (2026-10-04)
 
-**Built.** Sync core, sync engine, GitLab client, sidebar, setup wizard, diff view, settings, and CI/release workflows.
+**Built.**
+- Sync core, sync engine and GitLab client.
+- Sidebar, setup wizard, diff view, token window and settings (declarative on Obsidian 1.13+).
+- CI and tag-based release workflows. Releases 0.1.0, 0.1.1 and 0.1.2 are on GitHub.
 
 **Verified.**
-- `npx eslint .`: 0 errors. One warning about Obsidian 1.13's declarative settings search, which the 1.11.4 minimum predates.
+- `npx eslint .`: 0 errors, 0 warnings.
 - `npm run build`: passes (type checks + Svelte checks + bundle).
-- `npx vitest run`: 62 tests pass, including a property test where random two-device histories must converge, repeat as a no-op and lose nothing. Deliberately broken versions of the safety checks were confirmed to fail these tests.
-- The real sidebar and wizard were exercised in a browser preview (`npm run preview`) against the in-memory GitLab, in light and dark mode.
+- `npx vitest run`: 170 tests pass. They include:
+  - a property test where random two-device histories must converge, repeat as a no-op, lose nothing, and get commit messages that list exactly the files changed;
+  - WCAG contrast checks for both themes.
+
+  Deliberately broken versions of the safety checks were confirmed to fail these tests.
+- `npm run test:contract` against gitlab.com: 8/8 pass. Confirmed on real GitLab:
+  - stale `last_commit_id` updates and deletes are rejected;
+  - `create` of an existing file is rejected;
+  - blob ids equal git blob ids for CRLF, BOM, binary and non-ASCII names;
+  - downloads are byte-exact;
+  - HEAD returns blob and last-commit ids;
+  - `move` works without content;
+  - keyset tree pagination works past 100 entries.
+- Used in Obsidian 1.13.7 on Windows and on a phone:
+  - first sync, including pulling an existing project into an empty vault;
+  - edits, deletes and two-device round trips;
+  - the token and settings screens.
 
 **Not yet verified.**
-- **M0 contract tests against real GitLab** (`npm run test:contract`). These need a throwaway project and token in `.env.local`.
-- **Running inside Obsidian**, desktop and mobile.
+- Very large vaults (thousands of files) and slow mobile networks.
+- iOS, if only Android was tested.
 
 **Built differently from the plan.**
 - **Deletes follow Obsidian's "Deleted files" setting.** They use `fileManager.trashFile`, because Obsidian's lint rules forbid bypassing it. With Obsidian's defaults that means the trash; a user who chose "permanently delete" gets that.

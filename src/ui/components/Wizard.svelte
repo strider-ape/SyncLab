@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { DEVELOPER_ACCESS, normalizeBaseUrl, type GitLabBranch, type GitLabClient, type GitLabProject, type GitLabUser } from '../../gitlab/GitLabClient';
 	import { untrack } from 'svelte';
+	import { icon } from '../icon';
 	import { accessLevel, explain, tokenPageUrl, validateGitLabUrl, type WizardHost } from '../wizard';
 
 	let { host }: { host: WizardHost } = $props();
@@ -216,7 +217,7 @@
 			</div>
 			<div class="sl-card-body">
 				<p>SyncLab needs a token with the <b>api</b> scope. It's kept in this device's keychain, never in your vault.</p>
-				<button class="sl-btn is-yellow" type="button" onclick={() => host.openUrl(tokenPageUrl(baseUrl))}>Create a token on GitLab ↗</button>
+				<button class="sl-btn is-yellow" type="button" onclick={() => host.openUrl(tokenPageUrl(baseUrl))}><span>Create a token on GitLab</span><span class="sl-btn-icon" use:icon={'external-link'}></span></button>
 				<p class="sl-hint">The page opens with the name and scope filled in. Set an expiry date, create it, then copy it here.</p>
 				<label class="sl-label" for="sl-token">Token</label>
 				<input id="sl-token" class="sl-field" type="password" autocomplete="off" spellcheck="false" placeholder="glpat-…" bind:value={token} />

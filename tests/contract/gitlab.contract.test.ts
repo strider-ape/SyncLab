@@ -33,7 +33,7 @@ const env = loadEnv();
 const url = env.SYNCLAB_GITLAB_URL ?? '';
 const token = env.SYNCLAB_GITLAB_TOKEN ?? '';
 const projectId = Number(env.SYNCLAB_GITLAB_PROJECT ?? '');
-const configured = Boolean(url && token && projectId);
+const configured = Boolean(url && token && projectId) && !token.startsWith('paste-');
 
 const nodeHttp: HttpFn = async request => {
 	const response = await fetch(request.url, {

@@ -36,6 +36,8 @@ export interface EngineState {
 	checkedAt?: number;
 	lastSyncAt?: number;
 	error?: string;
+	/** GitLab error kind behind `error`, e.g. 'unauthorized' when the token was rejected. */
+	errorKind?: string;
 	progress?: { done: number; total: number };
 	log: LogEntry[];
 }
@@ -150,7 +152,7 @@ export class SyncEngine {
 
 		try {
 			await this.queue;
-			this.patch({ phase: 'syncing', error: undefined, progress: { done: 0, total: 0 } });
+			this.patch({ phase: 'syncing', error: undefined, errorKind: undefined, progress: { done: 0, total: 0 } });
 			this.log('info', 'Checking GitLab…');
 			let approvedDeletions = 0;
 
@@ -204,7 +206,7 @@ export class SyncEngine {
 		} catch (error) {
 			summary.error = describeError(error);
 			this.log('error', summary.error);
-			this.patch({ error: summary.error });
+			this.patch({ error: summary.error, errorKind: errorKindOf(error) });
 			return summary;
 		} finally {
 			this.running = false;
@@ -235,9 +237,10 @@ export class SyncEngine {
 				checkedAt: Date.now(),
 				lastSyncAt: this.stored?.lastSyncAt,
 				error: undefined,
+				errorKind: undefined,
 			});
 		} catch (error) {
-			if (config === this.config) this.patch({ error: describeError(error) });
+			if (config === this.config) this.patch({ error: describeError(error), errorKind: errorKindOf(error) });
 		} finally {
 			if (!this.running) this.patch({ phase: 'idle' });
 		}
@@ -573,6 +576,10 @@ function describeSummary(s: SyncSummary): string {
 	if (s.failed) parts.push(`${s.failed} failed`);
 	if (s.conflicts) parts.push(`${s.conflicts} conflict${s.conflicts === 1 ? '' : 's'} waiting`);
 	return parts.length ? `Done: ${parts.join(', ')}.` : 'Everything was already in sync.';
+}
+
+function errorKindOf(error: unknown): string | undefined {
+	return error instanceof GitLabError ? error.kind : undefined;
 }
 
 export function describeError(error: unknown): string {

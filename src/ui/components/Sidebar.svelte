@@ -142,7 +142,7 @@
 					<li>Paste a token (we'll open the right page)</li>
 					<li>Pick a project and a branch</li>
 				</ol>
-				<button class="sl-btn is-primary is-block" type="button" onclick={() => host.openSetup()}>
+				<button class="sl-btn is-primary is-block" type="button" onclick={() => ($info.missingToken ? host.replaceToken() : host.openSetup())}>
 					{$info.missingToken ? 'Add token' : 'Connect GitLab'}
 				</button>
 			</div>
@@ -150,8 +150,12 @@
 	{:else}
 		{#if $engineState.error}
 			<div class="sl-notice is-error" role="alert">
-				<div class="sl-notice-body"><b>Couldn't reach GitLab.</b> {$engineState.error}</div>
-				<button class="sl-mini" type="button" onclick={() => host.refresh()}>Retry</button>
+				<div class="sl-notice-body"><b>{$engineState.errorKind === 'unauthorized' ? 'GitLab rejected your token.' : 'Couldn’t reach GitLab.'}</b> {$engineState.errorKind === 'unauthorized' ? 'It may have expired or been revoked.' : $engineState.error}</div>
+				{#if $engineState.errorKind === 'unauthorized'}
+					<button class="sl-mini" type="button" onclick={() => host.replaceToken()}>Replace token</button>
+				{:else}
+					<button class="sl-mini" type="button" onclick={() => host.refresh()}>Retry</button>
+				{/if}
 			</div>
 		{/if}
 
@@ -301,7 +305,7 @@
 
 		<div class="sl-foot">
 			<span>{relativeTime($engineState.lastSyncAt, now)}</span>
-			<span>{$info.deviceName}</span>
+			<span>{$info.deviceName}{$info.version ? ` · v${$info.version}` : ''}</span>
 		</div>
 	{/if}
 </div>

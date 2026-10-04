@@ -9,6 +9,8 @@ export interface HostInfo {
 	projectPath: string;
 	branch: string;
 	deviceName: string;
+	/** Plugin version actually running, shown in the footer. */
+	version: string;
 }
 
 /** Everything the sidebar needs from the plugin. */
@@ -20,6 +22,8 @@ export interface SidebarHost {
 	openDiff(change: Change): void;
 	openFile(path: RepoPath): void;
 	openSetup(): void;
+	/** Opens the "Replace token" window. */
+	replaceToken(): void;
 	openSettings(): void;
 	openOnGitLab(): void;
 }

@@ -4,6 +4,8 @@
 
 SyncLab does one job: keep a vault (or one folder of it) and one GitLab branch identical, without ever losing a note. It talks to GitLab's API directly, so there's no git to install and it works on desktop and mobile.
 
+![The SyncLab sidebar in light and dark mode](https://raw.githubusercontent.com/strider-ape/SyncLab/main/docs/images/synclab-light-dark.png)
+
 ## How it works
 
 1. **Review.** The SyncLab sidebar lists what changed in your vault and what changed on GitLab, like a source control panel. Click a file to compare versions; untick anything you don't want in this sync.

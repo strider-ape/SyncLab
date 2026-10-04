@@ -286,6 +286,8 @@
 	transition: transform 0.07s ease, box-shadow 0.07s ease;
 }
 .synclab button.sl-btn:hover { background: var(--sl-card); }
+.synclab .sl-btn .sl-btn-icon { display: inline-grid; place-items: center; }
+.synclab .sl-btn .sl-btn-icon svg { width: 15px; height: 15px; stroke-width: 2.8; }
 .synclab button.sl-btn:active:not(:disabled) { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--sl-shade); }
 .synclab button.sl-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .synclab button.sl-btn.is-primary { background: var(--sl-green); color: var(--sl-on-fill); border-color: var(--sl-fill-ink); }
