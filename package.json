@@ -1,6 +1,6 @@
 {
 	"name": "synclab",
-	"version": "0.1.5",
+	"version": "0.1.6",
 	"description": "Review your changes and sync your vault with a GitLab repository in one press.",
 	"main": "main.js",
 	"type": "module",
