@@ -567,6 +567,29 @@
 .synclab .sl-steps-bar span.is-current { background: var(--sl-yellow); }
 .synclab .sl-wizard-actions { display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
 .synclab .sl-segment { display: flex; gap: 8px; flex-wrap: wrap; }
+.synclab button.sl-disclosure {
+	height: auto;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	width: 100%;
+	padding: 9px 12px;
+	border: var(--sl-bw-sm) dashed var(--sl-ink);
+	border-radius: var(--sl-radius-md);
+	background: transparent;
+	color: var(--sl-text);
+	box-shadow: none;
+	font: 800 11px var(--sl-font);
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+.synclab button.sl-disclosure:hover { background: var(--sl-field); }
+.synclab button.sl-disclosure[aria-expanded='true'] { border-style: solid; }
+.synclab .sl-disclosure-icon { display: inline-grid; place-items: center; }
+.synclab .sl-disclosure-icon svg { width: 15px; height: 15px; stroke-width: 2.8; }
+.synclab .sl-create { display: grid; gap: 10px; }
 .synclab .sl-results { display: grid; gap: 8px; max-height: 260px; overflow: auto; padding: 2px 8px 8px 2px; }
 .synclab button.sl-result {
 	height: auto;

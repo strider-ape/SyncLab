@@ -38,6 +38,8 @@
 	let projects = $state<GitLabProject[]>([]);
 	let project = $state<GitLabProject | null>(null);
 	let newProjectName = $state('Obsidian vault');
+	// Creating a project is the uncommon path, so it stays folded away until asked for.
+	let showCreate = $state(false);
 	let searchTimer = 0;
 
 	// Step 4
@@ -118,6 +120,7 @@
 			try {
 				project = await client!.createProject(newProjectName.trim());
 				projects = [project, ...projects];
+				showCreate = false;
 			} catch (e) {
 				error = explain(e);
 			}
@@ -245,18 +248,27 @@
 				<input class="sl-field" type="search" placeholder="Search your projects" value={query} oninput={onQuery} />
 				<div class="sl-results">
 					{#each projects as item (item.id)}
-						<button class="sl-result" type="button" aria-pressed={project?.id === item.id} onclick={() => (project = item)}>
+						<button class="sl-result" type="button" aria-pressed={project?.id === item.id} onclick={() => { project = item; showCreate = false; }}>
 							<span><b>{item.name}</b><small>{item.path_with_namespace}</small></span>
 						</button>
 					{:else}
 						<p class="sl-hint">No projects found.</p>
 					{/each}
 				</div>
-				<label class="sl-label" for="sl-new">Or create a new private project</label>
-				<div class="sl-segment">
-					<input id="sl-new" class="sl-field" type="text" bind:value={newProjectName} />
-					<button class="sl-btn" type="button" disabled={busy} onclick={createProject}>Create</button>
-				</div>
+				<button class="sl-disclosure" type="button" aria-expanded={showCreate} aria-controls="sl-create" onclick={() => (showCreate = !showCreate)}>
+					<span>Or create a new private project</span>
+					<span class="sl-disclosure-icon" use:icon={showCreate ? 'chevron-up' : 'chevron-down'}></span>
+				</button>
+				{#if showCreate}
+					<div id="sl-create" class="sl-create">
+						<label class="sl-label" for="sl-new">New project name</label>
+						<div class="sl-segment">
+							<input id="sl-new" class="sl-field" type="text" bind:value={newProjectName} />
+							<button class="sl-btn" type="button" disabled={busy} onclick={createProject}>Create</button>
+						</div>
+						<p class="sl-hint">Makes a new, empty private project on GitLab and selects it.</p>
+					</div>
+				{/if}
 			</div>
 		</section>
 		<div class="sl-wizard-actions">
