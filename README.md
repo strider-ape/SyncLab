@@ -17,7 +17,7 @@ SyncLab does one job: keep a vault (or one folder of it) and one GitLab branch i
 
 ## Getting started
 
-You need **Obsidian 1.11.4 or newer** and a **GitLab account** (the free plan on [gitlab.com](https://gitlab.com) is fine, or your company's own GitLab). That's all: no git, no command line, no SSH keys.
+You need **Obsidian 1.11.4 or newer** and a **GitLab account**. That's all: no git, no command line, no SSH keys.
 
 ### 1. Install SyncLab
 
