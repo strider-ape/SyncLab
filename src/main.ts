@@ -1,4 +1,4 @@
-import { debounce, Notice, Platform, Plugin } from 'obsidian';
+import { debounce, Keymap, Notice, Platform, Plugin } from 'obsidian';
 import { createIgnoreMatcher, normalizeFolder, toRepoPath, toVaultPath } from './core/paths';
 import type { Change, RepoPath } from './core/types';
 import { SyncEngine, type SyncRequest, type SyncSummary } from './engine/SyncEngine';
@@ -214,7 +214,7 @@ export default class SyncLabPlugin extends Plugin {
 			sync: request => this.sync(request),
 			refresh: () => void this.engine.refresh(),
 			openDiff: change => void this.openDiff(change),
-			openFile: path => void this.openFile(path),
+			openFile: (path, event) => void this.openFile(path, event),
 			openSetup: () => this.openSetup(),
 			replaceToken: () => this.openTokenModal(),
 			openSettings: () => this.openSettingsTab(),
@@ -232,9 +232,15 @@ export default class SyncLabPlugin extends Plugin {
 		}
 	}
 
-	private async openFile(path: RepoPath): Promise<void> {
+	private async openFile(path: RepoPath, event?: MouseEvent): Promise<void> {
 		const file = this.app.vault.getFileByPath(toVaultPath(path, normalizeFolder(this.settings.folder)));
-		if (file) await this.app.workspace.getLeaf(false).openFile(file);
+		if (!file) {
+			new Notice(`${path} isn't in this vault anymore.`);
+			return;
+		}
+		await this.app.workspace.getLeaf(event ? Keymap.isModEvent(event) : false).openFile(file);
+		// On phones the sidebar is a drawer covering the note, so close it.
+		if (Platform.isMobile) this.app.workspace.rightSplit.collapse();
 	}
 
 	private openSettingsTab(): void {

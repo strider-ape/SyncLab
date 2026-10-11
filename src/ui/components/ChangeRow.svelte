@@ -1,15 +1,17 @@
 <script lang="ts">
 	import type { Change } from '../../core/types';
 	import { badgeFor, splitPath } from '../format';
+	import { icon } from '../icon';
 
 	interface Props {
 		change: Change;
 		included: boolean;
 		onToggle: () => void;
 		onOpen: () => void;
+		onOpenFile: (event: MouseEvent) => void;
 	}
 
-	let { change, included, onToggle, onOpen }: Props = $props();
+	let { change, included, onToggle, onOpen, onOpenFile }: Props = $props();
 
 	const badge = $derived(badgeFor(change));
 	const parts = $derived(splitPath(change.path));
@@ -26,7 +28,10 @@
 	<span class="sl-badge {badge.className}" aria-hidden="true">{badge.letter}</span>
 	<button class="sl-name" type="button" onclick={onOpen} title={`Compare ${change.path}`}>
 		<b>{parts.name}</b>
-		<small>{parts.folder || 'Vault root'}</small>
+		<small>{badge.status} · {parts.folder || 'Vault root'}</small>
 	</button>
-	<span class="sl-tag">{badge.tag}</span>
+	<!-- Only files that exist in the vault right now can be opened. -->
+	{#if change.local !== undefined}
+		<button class="sl-open" type="button" aria-label={`Open ${parts.name}`} onclick={onOpenFile}><span use:icon={'file-text'}></span></button>
+	{/if}
 </div>

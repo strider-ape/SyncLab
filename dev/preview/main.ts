@@ -129,6 +129,14 @@ async function showDiff(device: Device, change: Change): Promise<void> {
 	modal = mount(DiffView, { target: modalTarget, props: { path: change.path, ...compareView(change, content), onClose: closeModal } });
 }
 
+/** The preview's editor pane stands in for Obsidian opening the note. */
+function showNote(device: Device, path: string): void {
+	const title = document.querySelector('.editor h1');
+	const body = document.querySelector('.editor p');
+	if (title) title.textContent = path;
+	if (body) body.textContent = device.vault.get(path) ?? '';
+}
+
 async function start() {
 	if (sidebar) await unmount(sidebar);
 	sidebarTarget.replaceChildren();
@@ -140,7 +148,7 @@ async function start() {
 		sync: request => device.engine.sync({ ...request, confirmDeletions: async () => true }),
 		refresh: () => void device.engine.refresh(),
 		openDiff: change => void showDiff(device, change),
-		openFile: () => undefined,
+		openFile: path => showNote(device, path),
 		openSetup: openWizard,
 		replaceToken: () => undefined,
 		openSettings: () => undefined,

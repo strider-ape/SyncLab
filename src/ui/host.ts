@@ -20,7 +20,8 @@ export interface SidebarHost {
 	sync(request: SyncRequest): Promise<SyncSummary>;
 	refresh(): void;
 	openDiff(change: Change): void;
-	openFile(path: RepoPath): void;
+	/** Opens the note in the editor. Ctrl/Cmd-click opens it in a new tab. */
+	openFile(path: RepoPath, event?: MouseEvent): void;
 	openSetup(): void;
 	/** Opens the "Replace token" window. */
 	replaceToken(): void;

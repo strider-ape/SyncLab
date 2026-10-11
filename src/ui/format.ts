@@ -25,13 +25,13 @@ export function conflictReason(reason: ConflictReason): string {
 	}
 }
 
-export function badgeFor(change: Change): { letter: string; className: string; tag: string } {
+export function badgeFor(change: Change): { letter: string; className: string; status: string } {
 	const { decision } = change;
-	if (decision.kind === 'conflict') return { letter: '!', className: 'sl-b-conflict', tag: 'conflict' };
+	if (decision.kind === 'conflict') return { letter: '!', className: 'sl-b-conflict', status: 'Conflict' };
 	const incoming = decision.kind === 'pull';
 	switch (decision.op) {
-		case 'create': return { letter: 'A', className: incoming ? 'sl-b-in' : 'sl-b-add', tag: 'new' };
-		case 'update': return { letter: 'M', className: incoming ? 'sl-b-in' : 'sl-b-mod', tag: 'edited' };
-		case 'delete': return { letter: 'D', className: incoming ? 'sl-b-in' : 'sl-b-del', tag: 'deleted' };
+		case 'create': return { letter: 'A', className: incoming ? 'sl-b-in' : 'sl-b-add', status: 'New' };
+		case 'update': return { letter: 'M', className: incoming ? 'sl-b-in' : 'sl-b-mod', status: 'Edited' };
+		case 'delete': return { letter: 'D', className: incoming ? 'sl-b-in' : 'sl-b-del', status: 'Deleted' };
 	}
 }

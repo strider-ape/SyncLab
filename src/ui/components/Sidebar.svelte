@@ -217,6 +217,9 @@
 									<b>{parts.name}</b>
 									<small>{change.decision.kind === 'conflict' ? conflictReason(change.decision.reason) : ''}</small>
 								</button>
+								{#if change.local !== undefined}
+									<button class="sl-open" type="button" aria-label={`Open ${parts.name}`} onclick={event => host.openFile(change.path, event)}><span use:icon={'file-text'}></span></button>
+								{/if}
 							</div>
 							<div class="sl-choices" role="group" aria-label={`Resolve ${change.path}`}>
 								<button class="sl-choice" type="button" aria-pressed={resolutions.get(change.path) === 'mine'} title="Keep the version in this vault" onclick={() => choose(change.path, 'mine')}>Mine</button>
@@ -240,7 +243,7 @@
 				</div>
 				<div class="sl-card-body sl-list">
 					{#each outgoing as change (change.path)}
-						<ChangeRow {change} included={!excluded.has(change.path)} onToggle={() => toggle(change)} onOpen={() => host.openDiff(change)} />
+						<ChangeRow {change} included={!excluded.has(change.path)} onToggle={() => toggle(change)} onOpen={() => host.openDiff(change)} onOpenFile={event => host.openFile(change.path, event)} />
 					{/each}
 				</div>
 			</section>
@@ -256,7 +259,7 @@
 				</div>
 				<div class="sl-card-body sl-list">
 					{#each incoming as change (change.path)}
-						<ChangeRow {change} included={!excluded.has(change.path)} onToggle={() => toggle(change)} onOpen={() => host.openDiff(change)} />
+						<ChangeRow {change} included={!excluded.has(change.path)} onToggle={() => toggle(change)} onOpen={() => host.openDiff(change)} onOpenFile={event => host.openFile(change.path, event)} />
 					{/each}
 				</div>
 			</section>

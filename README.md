@@ -8,7 +8,7 @@ SyncLab does one job: keep a vault (or one folder of it) and one GitLab branch i
 
 ## How it works
 
-1. **Review.** The SyncLab sidebar lists what changed in your vault and what changed on GitLab, like a source control panel. Click a file to compare versions; untick anything you don't want in this sync.
+1. **Review.** The SyncLab sidebar lists what changed in your vault and what changed on GitLab, like a source control panel. Click a file to compare versions, or the note button beside it to open the note. Untick anything you don't want in this sync.
 2. **Sync.** Press the big button. SyncLab pulls GitLab's changes, then pushes yours as a single commit, with your message or a generated one.
 3. **Decide conflicts.** If a note changed in both places, SyncLab never guesses. You pick:
    - **Mine:** your version is kept and replaces GitLab's.
