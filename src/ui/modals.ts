@@ -2,6 +2,7 @@ import { Modal, Notice, setIcon, type App } from 'obsidian';
 import { mount, unmount } from 'svelte';
 import type { Change } from '../core/types';
 import type { SyncEngine } from '../engine/SyncEngine';
+import { compareView } from './compare';
 import DiffView from './components/DiffView.svelte';
 import Wizard from './components/Wizard.svelte';
 import { explain, type WizardHost } from './wizard';
@@ -54,7 +55,7 @@ export class DiffModal extends SvelteModal {
 	protected create(target: HTMLElement): Mounted {
 		return mount(DiffView, {
 			target,
-			props: { path: this.change.path, remote: this.content.remote, local: this.content.local, onClose: () => this.close() },
+			props: { path: this.change.path, ...compareView(this.change, this.content), onClose: () => this.close() },
 		});
 	}
 }

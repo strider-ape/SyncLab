@@ -5,6 +5,7 @@ import Sidebar from '../../src/ui/components/Sidebar.svelte';
 import Wizard from '../../src/ui/components/Wizard.svelte';
 import DiffView from '../../src/ui/components/DiffView.svelte';
 import type { Change } from '../../src/core/types';
+import { compareView } from '../../src/ui/compare';
 import { Store } from '../../src/engine/store';
 import { GitLabError, type GitLabClient, type GitLabProject } from '../../src/gitlab/GitLabClient';
 import type { HostInfo, SidebarHost } from '../../src/ui/host';
@@ -125,7 +126,7 @@ async function showDiff(device: Device, change: Change): Promise<void> {
 	closeModal();
 	modalLayer.hidden = false;
 	modalTarget.parentElement?.classList.add('is-wide');
-	modal = mount(DiffView, { target: modalTarget, props: { path: change.path, remote: content.remote, local: content.local, onClose: closeModal } });
+	modal = mount(DiffView, { target: modalTarget, props: { path: change.path, ...compareView(change, content), onClose: closeModal } });
 }
 
 async function start() {

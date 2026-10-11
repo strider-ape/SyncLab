@@ -1,64 +1,22 @@
 <script lang="ts">
-	import { diffLines } from 'diff';
+	import { decodeText, diffRows, type CompareSide } from '../compare';
 
 	interface Props {
 		path: string;
-		remote: ArrayBuffer | null;
-		local: ArrayBuffer | null;
+		subtitle: string;
+		/** Lines read as changes from this version… */
+		before: CompareSide;
+		/** …to this one. */
+		after: CompareSide;
 		onClose: () => void;
 	}
 
-	let { path, remote, local, onClose }: Props = $props();
+	let { path, subtitle, before, after, onClose }: Props = $props();
 
-	type Line = { kind: 'add' | 'del' | 'same'; text: string } | { kind: 'gap'; count: number };
-
-	const CONTEXT = 3;
-
-	function decode(data: ArrayBuffer | null): string | null | undefined {
-		if (data === null) return null;
-		try {
-			return new TextDecoder('utf-8', { fatal: true }).decode(data);
-		} catch {
-			return undefined;
-		}
-	}
-
-	const remoteText = $derived(decode(remote));
-	const localText = $derived(decode(local));
-	const binary = $derived(remoteText === undefined || localText === undefined);
-
-	const lines = $derived.by((): Line[] => {
-		if (binary) return [];
-		const parts = diffLines(remoteText ?? '', localText ?? '');
-		const all: Array<{ kind: 'add' | 'del' | 'same'; text: string }> = [];
-		for (const part of parts) {
-			const kind = part.added ? 'add' : part.removed ? 'del' : 'same';
-			const text = part.value.endsWith('\n') ? part.value.slice(0, -1) : part.value;
-			for (const line of text.split('\n')) all.push({ kind, text: line });
-		}
-		// Collapse long runs of unchanged lines, keeping a little context around changes.
-		const out: Line[] = [];
-		let i = 0;
-		while (i < all.length) {
-			if (all[i]?.kind !== 'same') {
-				out.push(all[i]!);
-				i++;
-				continue;
-			}
-			let j = i;
-			while (j < all.length && all[j]?.kind === 'same') j++;
-			const run = all.slice(i, j);
-			const keepHead = i === 0 ? 0 : CONTEXT;
-			const keepTail = j === all.length ? 0 : CONTEXT;
-			if (run.length > keepHead + keepTail + 1) {
-				out.push(...run.slice(0, keepHead), { kind: 'gap', count: run.length - keepHead - keepTail }, ...run.slice(run.length - keepTail));
-			} else {
-				out.push(...run);
-			}
-			i = j;
-		}
-		return out;
-	});
+	const beforeText = $derived(decodeText(before.data));
+	const afterText = $derived(decodeText(after.data));
+	const binary = $derived(beforeText === undefined || afterText === undefined);
+	const lines = $derived(binary ? [] : diffRows(beforeText ?? '', afterText ?? ''));
 
 	function size(data: ArrayBuffer | null): string {
 		if (!data) return 'missing';
@@ -73,12 +31,12 @@
 	</div>
 	<section class="sl-card">
 		<div class="sl-card-head sl-head-blue">
-			<div class="sl-titles"><h2>{path}</h2><p>GitLab's version → this vault</p></div>
+			<div class="sl-titles"><h2>{path}</h2><p>{subtitle}</p></div>
 		</div>
 		<div class="sl-card-body">
 			<div class="sl-diff-legend">
-				<span class="sl-pill">− GitLab · {size(remote)}</span>
-				<span class="sl-pill">+ This vault · {size(local)}</span>
+				<span class="sl-pill">− {before.label} · {size(before.data)}</span>
+				<span class="sl-pill">+ {after.label} · {size(after.data)}</span>
 			</div>
 			{#if binary}
 				<p>This is a binary file, so there's no line-by-line view. Sizes are shown above.</p>
